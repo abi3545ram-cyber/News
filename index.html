@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cortex — Daily Knowledge</title>
+<meta name="description" content="Cortex — daily news, general-knowledge quiz, vocabulary, facts and live markets in one fast page.">
+<meta name="theme-color" content="#faf9f6">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{
+  color-scheme: light;
+  --paper:#faf9f6; --card:#ffffff; --card2:#f4f2ec;
+  --ink:#1c1b18; --ink2:#57534a; --ink3:#8a857a;
+  --line:#e7e3d9; --line2:#d8d3c6;
+  --ac:#1d4ed8; --ac-soft:#e8edfb;
+  --red:#c0392b; --red-soft:#faeae7;
+  --green:#1a7f4e; --green-soft:#e5f4ec;
+  --amber:#b45309; --amber-soft:#fdf0e0;
+  --violet:#6d28d9; --violet-soft:#f0eafa;
+  --teal:#0f766e; --teal-soft:#e0f2f0;
+  --gold:#a16207;
+  --serif:Georgia,'Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --rad:14px; --rad-s:9px;
+  --shadow:0 1px 2px rgba(28,27,24,.05),0 4px 14px rgba(28,27,24,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;padding-bottom:56px}
+::selection{background:var(--ac-soft)}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:var(--sans);cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+
+/* ---------- masthead ---------- */
+.masthead{padding:26px 0 14px;border-bottom:3px double var(--line2)}
+.masthead-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:.06em;line-height:1}
+.brand .dot{color:var(--red)}
+.tagline{color:var(--ink3);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;margin-top:7px}
+.mast-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.datebox{text-align:right;font-size:12.5px;color:var(--ink2);line-height:1.45}
+.datebox b{display:block;font-size:13.5px;color:var(--ink)}
+.streak{display:inline-flex;align-items:center;gap:7px;background:var(--amber-soft);color:var(--amber);border:1px solid #ecd9bd;border-radius:999px;padding:7px 13px;font-weight:600;font-size:13px}
+.streak svg{width:14px;height:14px}
+
+/* ---------- nav ---------- */
+.nav{position:sticky;top:0;z-index:50;background:rgba(250,249,246,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin-bottom:26px}
+.nav-inner{display:flex;gap:4px;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.tab{border:1px solid transparent;background:transparent;color:var(--ink2);padding:8px 16px;border-radius:999px;font-size:14px;font-weight:600;white-space:nowrap;transition:all .15s}
+.tab:hover{background:var(--card2);color:var(--ink)}
+.tab.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab .key{opacity:.45;font-size:11px;margin-left:6px;font-family:var(--mono)}
+
+/* ---------- generic ---------- */
+.view{display:none;animation:fadeup .25s ease}
+.view.active{display:block}
+@keyframes fadeup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:20px;box-shadow:var(--shadow)}
+.card.flat{box-shadow:none}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+.eyebrow.red{color:var(--red)}.eyebrow.blue{color:var(--ac)}.eyebrow.green{color:var(--green)}.eyebrow.violet{color:var(--violet)}.eyebrow.teal{color:var(--teal)}.eyebrow.gold{color:var(--gold)}
+h2.section{font-family:var(--serif);font-size:23px;margin:6px 0 16px}
+.muted{color:var(--ink2);font-size:13.5px}
+.tiny{color:var(--ink3);font-size:12px}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);background:var(--card);color:var(--ink);border-radius:var(--rad-s);padding:8px 14px;font-size:13.5px;font-weight:600;transition:all .15s}
+.btn:hover{border-color:var(--ink3);background:var(--card2)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.btn.primary:hover{background:#33312c}
+.btn.small{padding:5px 10px;font-size:12.5px;border-radius:7px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn svg{width:13px;height:13px}
+.chip{border:1px solid var(--line2);background:var(--card);color:var(--ink2);border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;transition:all .15s}
+.chip:hover{border-color:var(--ink3);color:var(--ink)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chiprow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.badge{display:inline-block;padding:2.5px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em}
+.badge.blue{background:var(--ac-soft);color:var(--ac)}
+.badge.red{background:var(--red-soft);color:var(--red)}
+.badge.green{background:var(--green-soft);color:var(--green)}
+.badge.amber{background:var(--amber-soft);color:var(--amber)}
+.badge.violet{background:var(--violet-soft);color:var(--violet)}
+.badge.teal{background:var(--teal-soft);color:var(--teal)}
+.badge.plain{background:var(--card2);color:var(--ink2)}
+.divider{border:0;border-top:1px solid var(--line);margin:14px 0}
+.err{background:var(--red-soft);border:1px solid #eeceC8;color:var(--red);border-radius:var(--rad-s);padding:11px 14px;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.skel{position:relative;overflow:hidden;background:var(--card2);border-radius:8px;min-height:14px}
+.skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:shimmer 1.3s infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--ink2);border-radius:50%;animation:rot .7s linear infinite;vertical-align:-2px}
+@keyframes rot{to{transform:rotate(360deg)}}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:600;opacity:0;transition:all .3s;z-index:99;box-shadow:0 6px 24px rgba(0,0,0,.18);max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- today ---------- */
+.hero{margin-bottom:22px}
+.hero h1{font-family:var(--serif);font-size:30px;line-height:1.2;margin-bottom:5px}
+.hero .sub{color:var(--ink2);font-size:14.5px}
+.today-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start}
+@media(max-width:860px){.today-grid{grid-template-columns:1fr}}
+.stack{display:grid;gap:16px}
+.headline-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.headline-item:last-child{border-bottom:0;padding-bottom:2px}
+.headline-item .n{font-family:var(--serif);font-size:15px;color:var(--line2);font-weight:700;min-width:20px;line-height:1.3}
+.headline-item h4{font-size:14.5px;font-weight:600;line-height:1.4}
+.headline-item h4 a{color:var(--ink)}
+.headline-item .meta{margin-top:3px}
+.wod-word{font-family:var(--serif);font-size:27px;font-weight:700;margin:2px 0 1px}
+.wod-pos{font-style:italic;color:var(--ink3);font-size:13px;margin-bottom:8px}
+.wod-def{font-size:14.5px;margin-bottom:8px}
+.wod-ex{font-size:13.5px;color:var(--ink2);font-style:italic;border-left:3px solid var(--line2);padding-left:11px}
+.mini-markets{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mini-tile{background:var(--card2);border-radius:var(--rad-s);padding:11px 13px}
+.mini-tile .lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.mini-tile .val{font-size:16.5px;font-weight:700;font-family:var(--mono);margin-top:2px}
+.mini-tile .chg{font-size:11.5px;font-weight:700;margin-top:1px}
+.up{color:var(--green)}.down{color:var(--red)}
+.otd-item{display:flex;gap:11px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.otd-item:last-child{border-bottom:0}
+.otd-year{font-family:var(--mono);font-weight:700;color:var(--ac);min-width:44px;font-size:12.5px;padding-top:1px}
+.dq-opts{display:grid;gap:7px;margin-top:10px}
+.ai-digest{background:linear-gradient(135deg,#f7f5ff,#eef4ff);border:1px solid #dfe3f7;border-radius:var(--rad-s);padding:13px 15px;font-size:13.5px;margin-top:12px;display:none}
+.briefing-body{font-size:14px}
+.briefing-body h4{font-family:var(--serif);font-size:16px;margin:14px 0 5px}
+.briefing-body h4:first-child{margin-top:0}
+.briefing-body p{margin-bottom:7px;color:#3d3a33}
+
+/* ---------- news ---------- */
+.news-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.search{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line2);border-radius:var(--rad-s);padding:8px 12px}
+.search input{border:0;outline:0;background:transparent;font-size:14px;width:100%;font-family:var(--sans);color:var(--ink)}
+.search svg{width:14px;height:14px;color:var(--ink3);flex-shrink:0}
+.news-item{padding:15px 0;border-bottom:1px solid var(--line);display:block}
+.news-item:last-child{border-bottom:0}
+.news-item h3{font-family:var(--serif);font-size:17.5px;line-height:1.35;font-weight:700;margin-bottom:4px}
+.news-item h3 a{color:var(--ink)}
+.news-item h3 a:hover{color:var(--ac);text-decoration:none}
+.news-item p{color:var(--ink2);font-size:13.5px;margin-bottom:5px}
+.news-meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--ink3)}
+.src{font-weight:700;color:var(--red);letter-spacing:.03em;font-size:11.5px;text-transform:uppercase}
+.livedot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ---------- quiz ---------- */
+.quiz-shell{max-width:720px;margin:0 auto}
+.setup-block{margin-bottom:18px}
+.setup-block .lbl{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.qprog{height:6px;background:var(--card2);border-radius:99px;overflow:hidden;margin:14px 0 20px}
+.qprog i{display:block;height:100%;background:var(--ink);border-radius:99px;transition:width .3s}
+.qtext{font-family:var(--serif);font-size:21px;line-height:1.4;margin-bottom:18px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line2);border-radius:var(--rad-s);padding:13px 15px;font-size:15px;font-weight:500;transition:all .13s;color:var(--ink)}
+.opt:hover:not(:disabled){border-color:var(--ink3);transform:translateX(2px)}
+.opt .letter{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink3);border:1px solid var(--line2);border-radius:6px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.opt.correct{border-color:var(--green);background:var(--green-soft)}
+.opt.correct .letter{background:var(--green);border-color:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:var(--red-soft)}
+.opt.wrong .letter{background:var(--red);border-color:var(--red);color:#fff}
+.opt:disabled{cursor:default;opacity:.92}
+.opts{display:grid;gap:9px}
+.expl{margin-top:14px;background:var(--card2);border-radius:var(--rad-s);padding:12px 15px;font-size:13.5px;color:var(--ink2);display:none}
+.expl b{color:var(--ink)}
+.quiz-foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+.score-big{font-family:var(--serif);font-size:56px;font-weight:700;line-height:1}
+.stat-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:16px 0}
+.stat-tile{background:var(--card2);border-radius:var(--rad-s);padding:13px;text-align:center}
+.stat-tile .v{font-size:21px;font-weight:700;font-family:var(--serif)}
+.stat-tile .l{font-size:11px;color:var(--ink3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.catbar{display:flex;align-items:center;gap:10px;font-size:13px;padding:6px 0}
+.catbar .nm{min-width:150px;color:var(--ink2)}
+.catbar .track{flex:1;height:7px;background:var(--card2);border-radius:99px;overflow:hidden}
+.catbar .track i{display:block;height:100%;background:var(--ac);border-radius:99px}
+.catbar .pc{min-width:40px;text-align:right;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+
+/* ---------- words ---------- */
+.word-row{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:15px 0;border-bottom:1px solid var(--line)}
+.word-row:last-child{border-bottom:0}
+.word-row h3{font-family:var(--serif);font-size:18px}
+.word-row .pos{font-style:italic;color:var(--ink3);font-size:12.5px;margin-left:6px;font-weight:400}
+.word-row p{font-size:13.5px;color:var(--ink2);margin-top:3px}
+.word-row .ex{font-style:italic;color:var(--ink3);font-size:12.5px;margin-top:3px}
+.mastered-btn{flex-shrink:0}
+.mastered-btn.done{background:var(--green-soft);border-color:#bfe3cf;color:var(--green)}
+.flash{max-width:560px;margin:0 auto;text-align:center}
+.flash-card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);box-shadow:var(--shadow);padding:44px 30px;margin:16px 0;min-height:210px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px}
+.flash-word{font-family:var(--serif);font-size:34px;font-weight:700}
+.progress-ring{display:flex;align-items:center;gap:14px;background:var(--card2);border-radius:var(--rad-s);padding:12px 16px;margin-bottom:16px}
+.pr-bar{flex:1;height:8px;background:#e2ded2;border-radius:99px;overflow:hidden}
+.pr-bar i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .4s}
+
+/* ---------- facts ---------- */
+.fact-hero{background:linear-gradient(135deg,#fdf8ec,#f8f3e4);border:1px solid #eee4c8;border-radius:var(--rad);padding:26px;margin-bottom:16px}
+.fact-hero .txt{font-family:var(--serif);font-size:20px;line-height:1.5;margin:8px 0 12px}
+.fact-item{padding:13px 0;border-bottom:1px solid var(--line);font-size:14.5px;display:flex;gap:12px;align-items:flex-start}
+.fact-item:last-child{border-bottom:0}
+.fact-item .badge{flex-shrink:0;margin-top:2px}
+
+/* ---------- markets ---------- */
+.mk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:16px}
+.mk-card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:18px;box-shadow:var(--shadow)}
+.mk-card .nm{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);display:flex;justify-content:space-between;align-items:center}
+.mk-card .px{font-family:var(--mono);font-size:25px;font-weight:700;margin:7px 0 2px}
+.mk-card .sub2{font-size:12.5px;color:var(--ink2);font-family:var(--mono)}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:20px;box-shadow:var(--shadow)}
+.chart-box{position:relative;height:230px;margin-top:10px}
+footer{margin-top:44px;padding:18px 0 8px;border-top:3px double var(--line2);color:var(--ink3);font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+@media(max-width:640px){
+  .brand{font-size:27px}
+  .hero h1{font-size:24px}
+  .qtext{font-size:18px}
+  .card{padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="masthead"><div class="wrap masthead-row">
+  <div>
+    <div class="brand">CORTEX<span class="dot">.</span></div>
+    <div class="tagline">Your daily knowledge hub</div>
+  </div>
+  <div class="mast-right">
+    <span class="streak" id="streakChip" title="Consecutive days you've opened Cortex">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 1.5s1 2.6-.7 5.2c-1.3 2-3.3 2.9-3.3 5.3 0 1.2.6 2.1 1.4 2.7-2.5-.4-4.9-2.4-4.9-5.7 0-2.1 1-3.6 1-3.6S3 7.6 3 12.6C3 17.8 7 21.5 12 21.5s9-3.5 9-8.6c0-6.5-5.4-7.6-5.4-11.4-1 .3-2.1 1.4-2.1 1.4z"/></svg>
+      <span id="streakTxt">Day 1</span>
+    </span>
+    <div class="datebox"><b id="mastDate"></b><span id="mastTime"></span></div>
+  </div>
+</div></div>
+
+<nav class="nav"><div class="wrap nav-inner" id="navTabs">
+  <button class="tab active" data-view="today">Today<span class="key">1</span></button>
+  <button class="tab" data-view="news">News<span class="key">2</span></button>
+  <button class="tab" data-view="quiz">Quiz<span class="key">3</span></button>
+  <button class="tab" data-view="words">Words<span class="key">4</span></button>
+  <button class="tab" data-view="facts">Facts<span class="key">5</span></button>
+  <button class="tab" data-view="markets">Markets<span class="key">6</span></button>
+</div></nav>
+
+<main class="wrap">
+
+<!-- ================= TODAY ================= -->
+<section class="view active" id="view-today">
+  <div class="hero">
+    <h1 id="greeting">Good morning, Abi</h1>
+    <div class="sub" id="heroSub">Here's everything worth knowing today.</div>
+  </div>
+  <div class="today-grid">
+    <div class="stack">
+      <div class="card">
+        <div class="card-head">
+          <span class="eyebrow red"><span class="livedot"></span>&nbsp; Top headlines</span>
+          <span style="display:flex;gap:7px">
+            <button class="btn small" id="aiDigestBtn" title="A 3-line AI digest of today's headlines">AI digest</button>
+            <button class="btn small" id="refreshHeadlines">Refresh</button>
+          </span>
+        </div>
+        <div id="aiDigestBox" class="ai-digest"></div>
+        <div id="todayHeadlines"><div class="skel" style="height:120px"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="eyebrow violet">Question of the day</span><span class="badge plain" id="dqCat"></span></div>
+        <div id="dailyQ"></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card">
+        <div class="card-head"><span class="eyebrow gold">Word of the day</span><span class="badge amber" id="wodTag"></span></div>
+        <div id="wodBox"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="eyebrow teal">Fun fact</span><button class="btn small" id="newFact">Another</button></div>
+        <div id="factBox" style="font-size:14.5px"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="eyebrow green">Markets at a glance</span></div>
+        <div class="mini-markets" id="miniMarkets">
+          <div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div>
+          <div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="eyebrow">On this day</span></div>
+        <div id="otdMini"><div class="skel" style="height:90px"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NEWS ================= -->
+<section class="view" id="view-news">
+  <h2 class="section">Live news</h2>
+  <div class="chiprow" id="newsCats"></div>
+  <div class="news-toolbar">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+      <input id="newsSearch" type="text" placeholder="Filter headlines…">
+    </div>
+    <button class="btn small" id="newsDigestBtn">AI digest</button>
+    <button class="btn small" id="newsRefresh">Refresh</button>
+  </div>
+  <div id="newsDigestBox" class="ai-digest" style="margin:0 0 12px"></div>
+  <div class="card flat" id="newsList"><div class="skel" style="height:260px"></div></div>
+  <p class="tiny" style="margin-top:10px">Sources: BBC News RSS &amp; Google News. Links open in your browser.</p>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="view" id="view-quiz">
+  <div class="quiz-shell" id="quizShell"></div>
+</section>
+
+<!-- ================= WORDS ================= -->
+<section class="view" id="view-words">
+  <h2 class="section">Word vault</h2>
+  <div class="progress-ring">
+    <span class="tiny" style="font-weight:700" id="wordsProgTxt"></span>
+    <div class="pr-bar"><i id="wordsProgBar" style="width:0%"></i></div>
+    <button class="btn small primary" id="startFlash">Practice flashcards</button>
+  </div>
+  <div id="flashArea" style="display:none"></div>
+  <div id="wordListArea">
+    <div class="news-toolbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+        <input id="wordSearch" type="text" placeholder="Search words…">
+      </div>
+      <div class="chiprow" style="margin:0" id="wordFilters">
+        <button class="chip on" data-wf="all">All</button>
+        <button class="chip" data-wf="learning">Learning</button>
+        <button class="chip" data-wf="mastered">Mastered</button>
+        <button class="chip" data-wf="cs">CS &amp; Maths</button>
+      </div>
+    </div>
+    <div class="card flat" id="wordList"></div>
+  </div>
+</section>
+
+<!-- ================= FACTS ================= -->
+<section class="view" id="view-facts">
+  <h2 class="section">Facts &amp; history</h2>
+  <div class="fact-hero">
+    <span class="eyebrow gold">Fact of the day</span>
+    <div class="txt" id="factOfDay"></div>
+    <button class="btn small" id="shuffleFact">Surprise me</button>
+  </div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-head"><span class="eyebrow">On this day in history</span><span class="badge plain" id="otdDate"></span></div>
+      <div id="otdFull"><div class="skel" style="height:200px"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="eyebrow teal">Fact library</span><span class="tiny" id="factCount"></span></div>
+      <div class="chiprow" id="factCats"></div>
+      <div id="factList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MARKETS ================= -->
+<section class="view" id="view-markets">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <h2 class="section" style="margin-bottom:10px">Markets</h2>
+    <span style="display:flex;gap:8px;align-items:center">
+      <span class="tiny" id="mkUpdated"></span>
+      <button class="btn small" id="mkRefresh">Refresh</button>
+    </span>
+  </div>
+  <div class="mk-grid" id="mkGrid">
+    <div class="skel" style="height:110px"></div><div class="skel" style="height:110px"></div>
+    <div class="skel" style="height:110px"></div><div class="skel" style="height:110px"></div>
+    <div class="skel" style="height:110px"></div><div class="skel" style="height:110px"></div>
+  </div>
+  <div class="chart-card">
+    <div class="card-head"><span class="eyebrow">Bitcoin — last 7 days (USD)</span><span class="tiny" id="btcChartNote"></span></div>
+    <div class="chart-box"><canvas id="btcChart"></canvas></div>
+  </div>
+  <p class="tiny" style="margin-top:12px">Gold &amp; silver via gold-api.com · crypto via Kraken · FX via frankfurter.dev. Informational only — not financial advice.</p>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <span>CORTEX — built for Abi · quiz, words &amp; facts work offline; news and markets are live</span>
+  <span>Keys 1–6 switch tabs</span>
+</footer>
+
+<div id="toast"></div>
+<script>
+/* ============================================================
+   CORTEX — daily knowledge hub
+   Data flows through window.cowork.callMcpTool (web_fetch + Apple Notes).
+   Quiz bank, word vault and fact library are embedded and work offline.
+   ============================================================ */
+'use strict';
+
+/* ---------- tiny helpers ---------- */
+const $=(s,r)=> (r||document).querySelector(s);
+const $$=(s,r)=> Array.from((r||document).querySelectorAll(s));
+const esc=s=> String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const decodeEnt=s=>{const d=document.createElement('div');d.innerHTML=String(s||'');return d.textContent||'';};
+const stripTags=s=>{const d=document.createElement('div');d.innerHTML=String(s||'');return (d.textContent||'').replace(/\s+/g,' ').trim();};
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600);}
+function timeAgo(d){if(!d||isNaN(d))return'';const s=(Date.now()-d.getTime())/1e3;if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function seedNum(salt){const s=todayKey()+'|'+salt;let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return Math.abs(h);}
+const seedPick=(arr,salt)=>arr[seedNum(salt)%arr.length];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const store={get(k,f){try{const v=localStorage.getItem('cx_'+k);return v==null?f:JSON.parse(v);}catch(e){return f;}},set(k,v){try{localStorage.setItem('cx_'+k,JSON.stringify(v));}catch(e){}}};
+const fmtMoney=(n,cur)=>(cur==='GBP'?'£':'$')+Number(n).toLocaleString('en-GB',{maximumFractionDigits:n>=100?0:2,minimumFractionDigits:n>=100?0:2});
+
+/* ---------- network layer (all via MCP) ---------- */
+async function mcpCall(tool,args){
+  if(!window.cowork||!window.cowork.callMcpTool) throw new Error('MCP bridge unavailable');
+  const r=await Promise.race([
+    window.cowork.callMcpTool(tool,args||{}),
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timed out')),25000))
+  ]);
+  if(r&&r.isError){throw new Error(stripTags((r.content&&r.content[0]&&r.content[0].text)||'Tool error').slice(0,140));}
+  if(r&&r.structuredContent!==undefined&&r.structuredContent!==null)return r.structuredContent;
+  return (r&&r.content&&r.content[0]&&r.content[0].text)||'';
+}
+async function fetchDirect(url){
+  const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),12000);
+  try{
+    const r=await fetch(url,{signal:ctl.signal,cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return await r.text();
+  }finally{clearTimeout(tm);}
+}
+const PROXIES=[
+  u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
+  u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
+  u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u)
+];
+/* Direct internet first; CORS proxies second (needed for RSS feeds); MCP bridge as a last resort. */
+async function webGet(url){
+  let last=null;
+  try{const t=await fetchDirect(url);if(t&&t.length>10)return t;last=new Error('empty response');}catch(e){last=e;}
+  for(const p of PROXIES){
+    try{const t=await fetchDirect(p(url));if(t&&t.length>10)return t;}catch(e){last=e;}
+  }
+  try{const t=await mcpCall('mcp__workspace__web_fetch',{url});const s=typeof t==='string'?t:JSON.stringify(t);if(s&&s.length>10)return s;}catch(e){last=e;}
+  throw new Error((last&&last.message)||'network unavailable');
+}
+function looseJSON(s){
+  if(typeof s!=='string')return s;
+  let i=s.indexOf('{');const j=s.indexOf('[');
+  if(i<0||(j>=0&&j<i))i=j;
+  if(i<0)throw new Error('No JSON in response');
+  return JSON.parse(s.slice(i).trim());
+}
+function looseXML(s){
+  let i=s.search(/<\?xml|<rss[\s>]|<feed[\s>]/);
+  if(i<0)i=s.indexOf('<');
+  if(i<0)throw new Error('No XML in response');
+  return new DOMParser().parseFromString(s.slice(i),'text/xml');
+}
+async function getJSON(url,cacheKey,ttlMin,force){
+  const c=cacheKey?store.get('cache_'+cacheKey,null):null;
+  if(c&&!force&&Date.now()-c.t<ttlMin*60000)return{data:c.d,cached:false,at:c.t};
+  try{const d=looseJSON(await webGet(url));if(cacheKey)store.set('cache_'+cacheKey,{t:Date.now(),d});return{data:d,cached:false,at:Date.now()};}
+  catch(e){if(c)return{data:c.d,cached:true,at:c.t};throw e;}
+}
+async function askAI(prompt,data){
+  if(!window.cowork||!window.cowork.askClaude)throw new Error('AI not available in this view');
+  const r=await window.cowork.askClaude(prompt,data);
+  if(typeof r==='string')return r;
+  if(r&&typeof r.text==='string')return r.text;
+  if(r&&r.content&&r.content[0]&&r.content[0].text)return r.content[0].text;
+  return String(r);
+}
+
+/* ---------- router ---------- */
+const inited={};
+function show(view){
+  $$('#navTabs .tab').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  $$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+view));
+  const init={news:initNews,quiz:initQuiz,words:initWords,facts:initFacts,markets:initMarkets}[view];
+  if(init&&!inited[view]){inited[view]=true;init();}
+  if(view==='markets')Markets.ensureChart();
+  window.scrollTo({top:0});
+}
+document.addEventListener('keydown',e=>{
+  if(/INPUT|TEXTAREA|SELECT/.test((e.target&&e.target.tagName)||''))return;
+  const m={'1':'today','2':'news','3':'quiz','4':'words','5':'facts','6':'markets'}[e.key];
+  if(m)show(m);
+});
+
+/* ---------- masthead / streak ---------- */
+function initMast(){
+  const now=new Date();
+  $('#mastDate').textContent=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  $('#mastTime').textContent='Brighton · updated '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const h=now.getHours();
+  $('#greeting').textContent=(h<5?'Up late, Abi?':h<12?'Good morning, Abi':h<18?'Good afternoon, Abi':'Good evening, Abi');
+  const st=store.get('streak',{last:null,n:0});
+  const tk=todayKey();
+  if(st.last!==tk){
+    const y=new Date(Date.now()-86400000);
+    const yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
+    st.n=(st.last===yk)?st.n+1:1;st.last=tk;store.set('streak',st);
+  }
+  $('#streakTxt').textContent='Day '+st.n;
+  $('#heroSub').textContent=st.n>1?('Day '+st.n+' in a row — here’s everything worth knowing today.'):'Here’s everything worth knowing today.';
+}
+
+/* ---------- news ---------- */
+const NEWS_CATS=[
+  ['top','Top stories','https://feeds.bbci.co.uk/news/rss.xml'],
+  ['world','World','https://feeds.bbci.co.uk/news/world/rss.xml'],
+  ['uk','UK','https://feeds.bbci.co.uk/news/uk/rss.xml'],
+  ['politics','Politics','https://feeds.bbci.co.uk/news/politics/rss.xml'],
+  ['business','Business','https://feeds.bbci.co.uk/news/business/rss.xml'],
+  ['tech','Technology','https://feeds.bbci.co.uk/news/technology/rss.xml'],
+  ['sci','Science','https://feeds.bbci.co.uk/news/science_and_environment/rss.xml'],
+  ['ai','AI','https://news.google.com/rss/search?q=artificial+intelligence&hl=en-GB&gl=GB&ceid=GB:en']
+];
+let newsCat='top', newsItems=[];
+function parseFeed(xmlText,fallbackSrc){
+  const doc=looseXML(xmlText);
+  const out=[];const seen={};
+  $$('item, entry',doc).forEach(it=>{
+    const g=t=>{const n=it.querySelector(t);return n?n.textContent:'';};
+    let title=decodeEnt(g('title')).trim();
+    let src=(it.querySelector('source')&&it.querySelector('source').textContent)||fallbackSrc;
+    if(src!==fallbackSrc&&title.endsWith(' - '+src))title=title.slice(0,-(' - '+src).length);
+    let link=g('link');
+    if(!link){const l=it.querySelector('link[href]');link=l?l.getAttribute('href'):'';}
+    const desc=stripTags(g('description')||g('summary')).slice(0,220);
+    const when=new Date(g('pubDate')||g('published')||g('updated')||'');
+    if(!title||seen[title])return;seen[title]=1;
+    out.push({title,link:link.trim(),desc,when,src});
+  });
+  out.sort((a,b)=>(b.when-a.when)||0);
+  return out;
+}
+async function loadNews(cat,force){
+  const cfg=NEWS_CATS.find(c=>c[0]===cat);
+  const fallbackSrc=cat==='ai'?'Google News':'BBC News';
+  const ck='news_'+cat;
+  const c=store.get('cache_'+ck,null);
+  if(c&&!force&&Date.now()-c.t<10*60000)return c.items.map(i=>({...i,when:new Date(i.when)}));
+  let items=null,err=null;
+  try{items=parseFeed(await webGet(cfg[2]),fallbackSrc).slice(0,26);if(!items.length)items=null;}catch(e){err=e;}
+  if(!items){
+    /* last-ditch: rss2json converts any feed to CORS-friendly JSON */
+    try{
+      const r=looseJSON(await webGet('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(cfg[2])));
+      if(r&&r.items&&r.items.length)items=r.items.map(it=>({title:decodeEnt(stripTags(it.title)),link:(it.link||'').trim(),desc:stripTags(it.description||'').slice(0,220),when:new Date(it.pubDate||''),src:fallbackSrc})).slice(0,26);
+    }catch(e){err=err||e;}
+  }
+  if(items){store.set('cache_'+ck,{t:Date.now(),items});return items;}
+  if(c)return c.items.map(i=>({...i,when:new Date(i.when)}));
+  throw err||new Error('feed unavailable');
+}
+function renderNews(){
+  const q=($('#newsSearch').value||'').toLowerCase();
+  const list=newsItems.filter(i=>!q||i.title.toLowerCase().includes(q)||i.desc.toLowerCase().includes(q));
+  $('#newsList').innerHTML=list.length?list.map(i=>
+    '<div class="news-item"><h3><a href="'+esc(i.link)+'" target="_blank" rel="noopener">'+esc(i.title)+'</a></h3>'+
+    (i.desc?'<p>'+esc(i.desc)+'</p>':'')+
+    '<div class="news-meta"><span class="src">'+esc(i.src)+'</span><span>·</span><span>'+esc(timeAgo(i.when))+'</span></div></div>'
+  ).join(''):'<p class="muted" style="padding:20px 0">Nothing matches that filter.</p>';
+}
+async function switchNews(cat,force){
+  newsCat=cat;
+  $$('#newsCats .chip').forEach(c=>c.classList.toggle('on',c.dataset.cat===cat));
+  $('#newsList').innerHTML='<div class="skel" style="height:260px"></div>';
+  $('#newsDigestBox').style.display='none';
+  try{newsItems=await loadNews(cat,force);renderNews();}
+  catch(e){$('#newsList').innerHTML='<div class="err"><span>Couldn’t load this feed ('+esc(e.message)+').</span><button class="btn small" onclick="switchNews(newsCat,true)">Retry</button></div>';}
+}
+function initNews(){
+  $('#newsCats').innerHTML=NEWS_CATS.map(c=>'<button class="chip'+(c[0]===newsCat?' on':'')+'" data-cat="'+c[0]+'">'+c[1]+'</button>').join('');
+  $$('#newsCats .chip').forEach(ch=>ch.onclick=()=>switchNews(ch.dataset.cat,false));
+  $('#newsSearch').oninput=renderNews;
+  $('#newsRefresh').onclick=()=>switchNews(newsCat,true);
+  $('#newsDigestBtn').onclick=async()=>{
+    const box=$('#newsDigestBox');box.style.display='block';box.innerHTML='<span class="spin"></span> Summarising '+newsItems.length+' headlines…';
+    try{const r=await askAI('Summarise these news headlines into a crisp briefing of 3 short bullet points (plain text, use •) for a UK computer science student. Under 80 words total.',newsItems.slice(0,14).map(i=>i.title+' — '+i.desc));box.innerHTML=esc(r).replace(/\n/g,'<br>');}
+    catch(e){box.style.display='none';toast(e.message);}
+  };
+  switchNews(newsCat,false);
+}
+
+/* ---------- today ---------- */
+async function initTodayHeadlines(force){
+  const el=$('#todayHeadlines');
+  el.innerHTML='<div class="skel" style="height:120px"></div>';
+  try{
+    const items=(await loadNews('top',force)).slice(0,6);
+    window._todayHeads=items;
+    el.innerHTML=items.map((i,n)=>
+      '<div class="headline-item"><span class="n">'+String(n+1).padStart(2,'0')+'</span><div><h4><a href="'+esc(i.link)+'" target="_blank" rel="noopener">'+esc(i.title)+'</a></h4><div class="news-meta meta"><span class="src">'+esc(i.src)+'</span><span>·</span><span>'+esc(timeAgo(i.when))+'</span></div></div></div>'
+    ).join('');
+  }catch(e){el.innerHTML='<div class="err"><span>Couldn’t load headlines ('+esc(e.message)+').</span><button class="btn small" id="rhx">Retry</button></div>';const b=$('#rhx');if(b)b.onclick=()=>initTodayHeadlines(true);}
+}
+function initWOD(){
+  const w=seedPick(WORDS,'wod');
+  $('#wodTag').textContent=WORD_TAGS[w[4]];
+  $('#wodBox').innerHTML='<div class="wod-word">'+esc(w[0])+'</div><div class="wod-pos">'+esc(w[1])+'</div><div class="wod-def">'+esc(w[2])+'</div><div class="wod-ex">“'+esc(w[3])+'”</div>';
+}
+function renderFact(f){$('#factBox').innerHTML=esc(f[0])+' <span class="badge teal" style="margin-left:4px">'+esc(f[1])+'</span>';}
+function initDailyQ(){
+  const box=$('#dailyQ');
+  let dq=store.get('dq',null);
+  if(!dq||dq.date!==todayKey()){dq={date:todayKey(),idx:seedNum('dq')%QUIZ.length,done:false,correct:false};store.set('dq',dq);}
+  const q=QUIZ[dq.idx];
+  $('#dqCat').textContent=QUIZ_CATS[q[0]];
+  const done=dq.done;
+  box.innerHTML='<div class="qtext" style="font-size:17px;margin-bottom:4px">'+esc(q[2])+'</div><div class="dq-opts">'+
+    q[3].map((o,i)=>'<button class="opt" data-i="'+i+'" '+(done?'disabled':'')+
+    ((done&&i===q[4])?' style="border-color:var(--green);background:var(--green-soft)"':'')+
+    '><span class="letter">'+'ABCD'[i]+'</span><span>'+esc(o)+'</span></button>').join('')+'</div>'+
+    (done?'<p class="tiny" style="margin-top:9px">'+(dq.correct?'You got this one right today. ':'You missed this one today. ')+esc(q[5])+'</p>':'');
+  if(!done)$$('#dailyQ .opt').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;dq.done=true;dq.correct=i===q[4];store.set('dq',dq);
+    Quiz.recordAnswer(q[0],dq.correct);
+    toast(dq.correct?'Correct — nice one.':'Not quite — answer revealed.');
+    initDailyQ();
+  });
+}
+async function initOTD(){
+  const d=new Date();
+  const url='https://byabbe.se/on-this-day/'+(d.getMonth()+1)+'/'+d.getDate()+'/events.json';
+  try{
+    const r=await getJSON(url,'otd_'+todayKey(),720,false);
+    const ev=(r.data.events||[]).filter(e=>e.description);
+    window._otd=ev;
+    const picks=[];const n=ev.length;
+    if(n){const idxs=new Set();for(let k=0;k<9&&idxs.size<Math.min(3,n);k++)idxs.add((seedNum('otd'+k)%n));picks.push(...Array.from(idxs).sort((a,b)=>a-b).map(i=>ev[i]));}
+    $('#otdMini').innerHTML=picks.length?picks.map(e=>'<div class="otd-item"><span class="otd-year">'+esc(e.year)+'</span><span>'+esc(e.description)+'</span></div>').join(''):'<p class="muted">No events found.</p>';
+    renderOTDFull();
+  }catch(e){$('#otdMini').innerHTML='<p class="muted">On-this-day feed unavailable right now.</p>';}
+}
+function renderOTDFull(){
+  const ev=window._otd||[];const box=$('#otdFull');if(!box)return;
+  const d=new Date();$('#otdDate').textContent=d.toLocaleDateString('en-GB',{day:'numeric',month:'long'});
+  if(!ev.length){box.innerHTML='<p class="muted">Nothing loaded yet — check the Today tab first.</p>';return;}
+  const step=Math.max(1,Math.floor(ev.length/12));
+  const picks=ev.filter((_,i)=>i%step===0).slice(0,12);
+  box.innerHTML=picks.map(e=>{
+    const wl=(e.wikipedia&&e.wikipedia[0]&&e.wikipedia[0].wikipedia)||'';
+    return '<div class="otd-item"><span class="otd-year">'+esc(e.year)+'</span><span>'+esc(e.description)+(wl?' <a href="'+esc(wl)+'" target="_blank" rel="noopener" class="tiny">wiki</a>':'')+'</span></div>';
+  }).join('');
+}
+function initToday(){
+  initTodayHeadlines(false);initWOD();renderFact(seedPick(FACTS,'fact'));initDailyQ();initOTD();
+  Markets.loadMini();
+  $('#newFact').onclick=()=>renderFact(FACTS[Math.floor(Math.random()*FACTS.length)]);
+  $('#refreshHeadlines').onclick=()=>initTodayHeadlines(true);
+  $('#aiDigestBtn').onclick=async()=>{
+    const box=$('#aiDigestBox');const items=window._todayHeads||[];
+    if(!items.length){toast('Headlines haven’t loaded yet');return;}
+    box.style.display='block';box.innerHTML='<span class="spin"></span> Writing your digest…';
+    try{const r=await askAI('Turn these headlines into a warm, crisp 3-sentence morning digest for Abi, a UK computer science student. Plain text only.',items.map(i=>i.title));box.innerHTML=esc(r).replace(/\n/g,'<br>');}
+    catch(e){box.style.display='none';toast(e.message);}
+  };
+}
+</script>
+<script>
+'use strict';
+/* ================= DATA ================= */
+const QUIZ_CATS=["Science & Nature","History","Geography","Tech & Computing","Arts & Culture","Sport & Games"];
+/* [cat, difficulty(0-2), question, [4 options], answerIndex, why] */
+const QUIZ=[
+[0,0,"What is the chemical symbol for gold?",["Ag","Au","Gd","Go"],1,"From the Latin aurum."],
+[0,0,"Which planet is known as the Red Planet?",["Venus","Jupiter","Mars","Mercury"],2,"Iron oxide dust gives Mars its colour."],
+[0,0,"What gas do plants release during photosynthesis?",["Carbon dioxide","Nitrogen","Oxygen","Methane"],2,"They take in CO2 and release O2."],
+[0,0,"What is the largest planet in the solar system?",["Saturn","Neptune","Earth","Jupiter"],3,"Jupiter is over 300 times Earth's mass."],
+[0,0,"How many chromosomes do humans typically have?",["23","46","44","48"],1,"23 pairs, 46 in total."],
+[0,1,"What is the smallest bone in the human body?",["Stapes","Femur","Incus","Hyoid"],0,"The stapes sits in the middle ear."],
+[0,1,"Roughly what temperature is absolute zero?",["-100 °C","-273.15 °C","-459.67 °C","0 K exactly at -300 °C"],1,"0 kelvin = -273.15 °C."],
+[0,0,"Which gas makes up about 78% of Earth's atmosphere?",["Oxygen","Carbon dioxide","Nitrogen","Argon"],2,"Oxygen is only about 21%."],
+[0,0,"What shape is a DNA molecule?",["Single strand","Double helix","Triple helix","Ring"],1,"Watson, Crick and Franklin's double helix, 1953."],
+[0,1,"Who discovered penicillin?",["Marie Curie","Louis Pasteur","Alexander Fleming","Joseph Lister"],2,"Fleming noticed mould killing bacteria in 1928."],
+[0,1,"An element's atomic number equals its number of what?",["Neutrons","Electrons plus neutrons","Protons","Nucleons"],2,"Protons define the element."],
+[0,0,"What is the SI unit of force?",["Joule","Newton","Watt","Pascal"],1,"1 N accelerates 1 kg at 1 m/s²."],
+[0,1,"Which blood type is the universal donor?",["O negative","O positive","AB negative","AB positive"],0,"O- lacks A, B and Rh antigens."],
+[0,1,"Which tissue carries water up a plant?",["Phloem","Xylem","Cambium","Stomata"],1,"Phloem carries sugars; xylem carries water."],
+[0,0,"What pH value is neutral?",["0","1","7","14"],2,"Below 7 acidic, above 7 alkaline."],
+[0,0,"What is the hardest naturally occurring substance?",["Quartz","Titanium","Graphene","Diamond"],3,"10 on the Mohs scale."],
+[0,1,"A light-year measures what?",["Time","Distance","Brightness","Speed"],1,"The distance light travels in a year, about 9.46 trillion km."],
+[0,1,"Mitochondria primarily produce which molecule?",["Glucose","ATP","DNA","Haemoglobin"],1,"ATP is the cell's energy currency."],
+[0,2,"What particle did CERN confirm in 2012?",["Graviton","Higgs boson","Tachyon","Magnetic monopole"],1,"The Higgs gives other particles mass."],
+[0,2,"Which metal is liquid at room temperature?",["Gallium","Sodium","Mercury","Caesium"],2,"Gallium melts just above room temperature; mercury below it."],
+[1,0,"In which year did the Second World War end?",["1943","1944","1945","1946"],2,"VE Day in May, VJ Day in August 1945."],
+[1,0,"Who was the first person to walk on the Moon?",["Buzz Aldrin","Yuri Gagarin","Michael Collins","Neil Armstrong"],3,"Apollo 11, 20 July 1969."],
+[1,0,"The Magna Carta was sealed in which year?",["1066","1215","1315","1415"],1,"King John sealed it at Runnymede."],
+[1,0,"In which year did the Berlin Wall fall?",["1985","1989","1991","1993"],1,"9 November 1989."],
+[1,0,"How many wives did Henry VIII have?",["Four","Five","Six","Seven"],2,"Divorced, beheaded, died; divorced, beheaded, survived."],
+[1,1,"The French Revolution began in which year?",["1776","1789","1799","1815"],1,"The Bastille fell on 14 July 1789."],
+[1,0,"Who was the first President of the United States?",["Thomas Jefferson","John Adams","George Washington","Benjamin Franklin"],2,"He served 1789-1797."],
+[1,1,"The Battle of Hastings took place in which year?",["1066","1086","1106","1166"],0,"William of Normandy defeated Harold II."],
+[1,0,"Which ship sank on its maiden voyage in 1912?",["Lusitania","Britannic","Titanic","Olympic"],2,"It struck an iceberg in the North Atlantic."],
+[1,1,"The Great Fire of London happened in which year?",["1566","1616","1666","1716"],2,"It started in a bakery on Pudding Lane."],
+[1,1,"Whose assassination sparked the First World War?",["Tsar Nicholas II","Archduke Franz Ferdinand","Kaiser Wilhelm II","Otto von Bismarck"],1,"Shot in Sarajevo, June 1914."],
+[1,1,"Who became South Africa's first Black president in 1994?",["Desmond Tutu","Thabo Mbeki","Nelson Mandela","F.W. de Klerk"],2,"After 27 years in prison."],
+[1,2,"The Western Roman Empire fell in which year?",["376 AD","410 AD","476 AD","527 AD"],2,"Odoacer deposed Romulus Augustulus."],
+[1,1,"Who was the last Tudor monarch?",["Henry VIII","Mary I","Edward VI","Elizabeth I"],3,"She died childless in 1603."],
+[1,1,"Which two superpowers faced off in the Cold War?",["UK and USSR","USA and USSR","USA and China","France and Germany"],1,"Roughly 1947 to 1991."],
+[1,2,"Cleopatra was the last active ruler of which dynasty?",["Seleucid","Achaemenid","Ptolemaic","Antigonid"],2,"A Greek dynasty ruling Egypt after Alexander."],
+[1,1,"Which ancient wonder still stands today?",["Colossus of Rhodes","Great Pyramid of Giza","Hanging Gardens","Lighthouse of Alexandria"],1,"The only surviving wonder of the ancient world."],
+[1,2,"The suffragette movement campaigned for what?",["Workers' unions","Votes for women","Irish independence","Abolition of slavery"],1,"UK women over 30 gained the vote in 1918."],
+[2,0,"What is the capital of Australia?",["Sydney","Melbourne","Canberra","Perth"],2,"A purpose-built capital between Sydney and Melbourne."],
+[2,0,"Which river is traditionally considered the world's longest?",["Amazon","Nile","Yangtze","Mississippi"],1,"About 6,650 km, though the Amazon runs it close."],
+[2,0,"What is the largest ocean?",["Atlantic","Indian","Arctic","Pacific"],3,"It covers about a third of Earth's surface."],
+[2,1,"How tall is Mount Everest, roughly?",["7,849 m","8,849 m","9,849 m","8,249 m"],1,"The 2020 China-Nepal survey says 8,848.86 m."],
+[2,0,"How many countries make up the United Kingdom?",["Two","Three","Four","Five"],2,"England, Scotland, Wales, Northern Ireland."],
+[2,0,"What is the largest hot desert in the world?",["Gobi","Sahara","Kalahari","Arabian"],1,"Antarctica is larger but a cold desert."],
+[2,0,"What is the capital of Japan?",["Osaka","Kyoto","Tokyo","Nagoya"],2,"Kyoto was the ancient capital."],
+[2,0,"Which river flows through London?",["Severn","Mersey","Thames","Tyne"],2,"About 346 km long."],
+[2,1,"Which is the world's most populous country?",["China","USA","Indonesia","India"],3,"India overtook China in 2023."],
+[2,0,"What is the smallest country in the world?",["Monaco","Vatican City","San Marino","Liechtenstein"],1,"About 0.49 km²."],
+[2,1,"How many countries are in Africa?",["44","49","54","61"],2,"The most of any continent."],
+[2,0,"What language is mainly spoken in Brazil?",["Spanish","Portuguese","Brazilian Creole","Italian"],1,"A legacy of Portuguese colonisation."],
+[2,1,"What is the capital of Canada?",["Toronto","Vancouver","Montreal","Ottawa"],3,"Chosen as a compromise between English and French Canada."],
+[2,1,"The Great Barrier Reef lies off which country?",["Indonesia","Australia","Philippines","Fiji"],1,"Off the coast of Queensland."],
+[2,0,"The University of Sussex is on the edge of which city?",["Bristol","Southampton","Brighton","Canterbury"],2,"At Falmer, just outside Brighton."],
+[2,2,"What is the world's tallest waterfall?",["Niagara Falls","Victoria Falls","Angel Falls","Iguazu Falls"],2,"979 m, in Venezuela."],
+[2,1,"Which city spans two continents?",["Cairo","Istanbul","Moscow","Dubai"],1,"The Bosphorus splits its European and Asian sides."],
+[2,1,"What is the capital of New Zealand?",["Auckland","Christchurch","Wellington","Queenstown"],2,"Auckland is bigger, but Wellington is the capital."],
+[2,2,"Which country has the most time zones (including territories)?",["Russia","USA","France","China"],2,"Twelve or thirteen, thanks to overseas territories."],
+[3,0,"What does CPU stand for?",["Central Processing Unit","Computer Power Unit","Central Program Utility","Core Processing Unit"],0,"The processor executing instructions."],
+[3,0,"Binary is a number system of which base?",["Base 8","Base 2","Base 10","Base 16"],1,"Just 0s and 1s."],
+[3,0,"How many bits are in a byte?",["4","8","16","32"],1,"Eight bits per byte."],
+[3,1,"Hexadecimal is which base?",["Base 6","Base 12","Base 16","Base 60"],2,"Digits 0-9 then A-F."],
+[3,1,"What is the average time complexity of binary search?",["O(n)","O(n log n)","O(log n)","O(1)"],2,"Each step halves the search space."],
+[3,1,"What is quicksort's average time complexity?",["O(n²)","O(n log n)","O(log n)","O(n)"],1,"Worst case is O(n²) on bad pivots."],
+[3,0,"A stack follows which principle?",["FIFO","LIFO","LILO","Random access"],1,"Last in, first out — like a pile of plates."],
+[3,0,"A queue follows which principle?",["LIFO","FILO","FIFO","Priority only"],2,"First in, first out."],
+[3,1,"Who is considered the first computer programmer?",["Grace Hopper","Ada Lovelace","Charles Babbage","Alan Turing"],1,"Her 1843 notes described an algorithm for the Analytical Engine."],
+[3,1,"Who proposed the imitation game, now called the Turing test?",["John von Neumann","Claude Shannon","Alan Turing","Marvin Minsky"],2,"In his 1950 paper on machine intelligence."],
+[3,1,"Who invented the World Wide Web?",["Vint Cerf","Tim Berners-Lee","Bill Gates","Marc Andreessen"],1,"At CERN in 1989."],
+[3,1,"Who created the Python language?",["Guido van Rossum","James Gosling","Dennis Ritchie","Bjarne Stroustrup"],0,"Named after Monty Python, not the snake."],
+[3,1,"Who created both Linux and Git?",["Richard Stallman","Ken Thompson","Linus Torvalds","Andrew Tanenbaum"],2,"Git was written in 2005 to manage the Linux kernel."],
+[3,2,"JavaScript was famously first built in how long?",["10 days","10 weeks","10 months","2 years"],0,"Brendan Eich at Netscape, 1995."],
+[3,0,"What does SQL stand for?",["Simple Query Language","Structured Query Language","Standard Question Language","Sequential Query Logic"],1,"The standard language for relational databases."],
+[3,1,"RAM is described as volatile because it…",["Overheats easily","Loses data without power","Corrupts data over time","Cannot be rewritten"],1,"Contents vanish when power is cut."],
+[3,1,"What does DNS do?",["Encrypts traffic","Maps domain names to IP addresses","Routes packets","Compresses web pages"],1,"The internet's phone book."],
+[3,0,"What does HTTP stand for?",["HyperText Transfer Protocol","High Throughput Transfer Process","HyperText Terminal Protocol","Host Transfer Text Protocol"],0,"The protocol of the web; HTTPS adds encryption."],
+[3,1,"Moore's law observed that transistor counts double roughly every…",["6 months","2 years","5 years","10 years"],1,"Gordon Moore's 1965 observation."],
+[3,2,"Boolean logic is named after which mathematician?",["Blaise Pascal","George Boole","John Venn","Augustus De Morgan"],1,"His 1854 work laid the ground for digital circuits."],
+[3,0,"What does a compiler do?",["Runs code line by line","Translates source code to machine code","Manages memory at runtime","Formats code"],1,"Interpreters execute line by line instead."],
+[3,2,"In what year was the C programming language created, roughly?",["1962","1972","1982","1992"],1,"Dennis Ritchie at Bell Labs."],
+[4,0,"Who painted the Mona Lisa?",["Michelangelo","Raphael","Leonardo da Vinci","Botticelli"],2,"It hangs in the Louvre."],
+[4,0,"Who wrote the novel 1984?",["Aldous Huxley","George Orwell","Ray Bradbury","Anthony Burgess"],1,"Published in 1949."],
+[4,0,"Who painted The Starry Night?",["Claude Monet","Vincent van Gogh","Paul Cézanne","Edvard Munch"],1,"Painted from an asylum window in 1889."],
+[4,0,"Who wrote Pride and Prejudice?",["Charlotte Brontë","Emily Brontë","Jane Austen","Mary Shelley"],2,"Published in 1813."],
+[4,0,"'To be or not to be' is from which play?",["Macbeth","King Lear","Othello","Hamlet"],3,"The Prince of Denmark's soliloquy."],
+[4,1,"Who painted the Sistine Chapel ceiling?",["Leonardo da Vinci","Michelangelo","Raphael","Titian"],1,"It took him about four years."],
+[4,0,"Romeo and Juliet is set in which city?",["Venice","Florence","Verona","Rome"],2,"'In fair Verona, where we lay our scene.'"],
+[4,1,"Who wrote Frankenstein?",["Bram Stoker","Mary Shelley","Percy Shelley","Lord Byron"],1,"She began it aged 18, published 1818."],
+[4,1,"Who composed Swan Lake?",["Stravinsky","Rachmaninoff","Tchaikovsky","Prokofiev"],2,"Premiered in 1877."],
+[4,1,"The Odyssey is attributed to which poet?",["Virgil","Sophocles","Homer","Ovid"],2,"The sequel of sorts to the Iliad."],
+[4,1,"The street artist Banksy is most associated with which UK city?",["London","Manchester","Bristol","Liverpool"],2,"His work first appeared there in the 1990s."],
+[4,1,"Melting clocks appear in the work of which artist?",["Picasso","Salvador Dalí","Magritte","Miró"],1,"The Persistence of Memory, 1931."],
+[4,0,"The Beatles formed in which city?",["London","Liverpool","Manchester","Birmingham"],1,"Formed in 1960."],
+[4,0,"Ebenezer Scrooge appears in which novel?",["Oliver Twist","Great Expectations","A Christmas Carol","David Copperfield"],2,"Dickens wrote it in just six weeks."],
+[4,2,"Guernica was painted by whom?",["Francisco Goya","Pablo Picasso","Diego Rivera","Joan Miró"],1,"A response to the 1937 bombing of Guernica."],
+[4,0,"Who wrote the Harry Potter series?",["J.R.R. Tolkien","Philip Pullman","J.K. Rowling","Roald Dahl"],2,"The first book appeared in 1997."],
+[5,0,"How often is the FIFA World Cup held?",["Every 2 years","Every 3 years","Every 4 years","Every 5 years"],2,"Like the Olympics."],
+[5,0,"Wimbledon is played on which surface?",["Clay","Grass","Hard court","Carpet"],1,"The oldest tennis tournament in the world."],
+[5,0,"How many rings are on the Olympic flag?",["4","5","6","7"],1,"Representing the inhabited continents."],
+[5,1,"How long is a marathon?",["40.195 km","41.195 km","42.195 km","44.195 km"],2,"26.2 miles."],
+[5,1,"How high is a basketball hoop?",["2.75 m","3.05 m","3.35 m","3.65 m"],1,"Ten feet."],
+[5,0,"How many players are on a cricket team?",["9","10","11","12"],2,"Same as football."],
+[5,0,"The Tour de France is a race in which sport?",["Running","Sailing","Motorsport","Cycling"],3,"Held every July since 1903."],
+[5,1,"In golf, a hole-in-one is also called what?",["An eagle","An ace","An albatross","A condor"],1,"Rarer terms exist for multi-shot feats."],
+[5,0,"How many teams play in the Premier League?",["18","20","22","24"],1,"Three are relegated each season."],
+[5,1,"What is Usain Bolt's 100m world record?",["9.48 s","9.58 s","9.69 s","9.72 s"],1,"Set in Berlin, 2009."],
+[5,0,"How many pieces does each chess player start with?",["12","14","16","18"],2,"Eight pawns and eight others."],
+[5,1,"The Ashes is contested between England and which country?",["India","South Africa","Australia","New Zealand"],2,"Named after an 1882 obituary for English cricket."],
+[5,2,"Hamilton and Schumacher each hold how many F1 titles?",["Six","Seven","Eight","Nine"],1,"The joint record."],
+[5,1,"How many players are on a rugby union team?",["11","13","15","17"],2,"Rugby league uses 13."],
+[5,0,"Which city hosted the 2012 Summer Olympics?",["Paris","Rio","London","Beijing"],2,"The third London games after 1908 and 1948."],
+[5,2,"What is the maximum break in snooker?",["141","147","150","155"],1,"Fifteen reds with blacks, then all colours."]
+];
+const WORD_TAGS=["CS & Maths","Academic","General"];
+/* [word, part of speech, definition, example, tag] */
+const WORDS=[
+["idempotent","adj.","Producing the same result no matter how many times it is applied.","HTTP GET is idempotent — calling it twice changes nothing.",0],
+["orthogonal","adj.","Independent; changing one thing does not affect the other.","Keep authentication orthogonal to business logic.",0],
+["canonical","adj.","The standard, accepted or simplest form of something.","Store URLs in canonical form before comparing them.",0],
+["heuristic","n.","A practical rule of thumb that finds good-enough answers fast.","A* uses a heuristic to guide its search.",0],
+["stochastic","adj.","Involving randomness; describable only by probability.","Stochastic gradient descent samples random batches.",0],
+["deterministic","adj.","Always producing the same output from the same input.","Pure functions are deterministic by definition.",0],
+["asymptotic","adj.","Describing behaviour as input size approaches infinity.","Big-O notation captures asymptotic complexity.",0],
+["amortised","adj.","Averaged over a sequence of operations.","Appending to a dynamic array is amortised O(1).",0],
+["memoisation","n.","Caching a function's results to avoid recomputation.","Memoisation turns naive Fibonacci from exponential to linear.",0],
+["invariant","n.","A condition that stays true throughout execution.","The loop invariant holds before and after each iteration.",0],
+["isomorphic","adj.","Identical in structure, even if different in appearance.","The two graphs are isomorphic — same shape, different labels.",0],
+["monotonic","adj.","Only ever increasing, or only ever decreasing.","Timestamps should come from a monotonic clock.",0],
+["tractable","adj.","Solvable in practice; manageable in polynomial time.","The relaxed version of the problem is tractable.",0],
+["pathological","adj.","Deliberately awkward; a worst-case input.","Quicksort degrades on pathological, already-sorted input.",0],
+["ephemeral","adj.","Lasting a very short time.","Containers are ephemeral — nothing on them survives a restart.",0],
+["atomic","adj.","Indivisible; happening entirely or not at all.","Wrap both writes in one atomic transaction.",0],
+["boilerplate","n.","Standard code repeated with little variation.","The framework generates the boilerplate for you.",0],
+["sentinel","n.","A special value marking a boundary or end.","Use -1 as a sentinel to terminate the input loop.",0],
+["axiom","n.","A statement accepted as true without proof.","Peano's axioms define the natural numbers.",0],
+["lemma","n.","A small proven result used to prove something bigger.","The pumping lemma shows this language is not regular.",0],
+["corollary","n.","A result that follows immediately from another.","A corollary of the theorem is that the sort is optimal.",0],
+["conjecture","n.","A statement believed true but not yet proven.","Goldbach's conjecture remains open after 280 years.",0],
+["cardinality","n.","The number of elements in a set.","The cardinality of the reals exceeds that of the integers.",0],
+["empirical","adj.","Based on observation or experiment, not theory alone.","Benchmark it — we need empirical evidence, not intuition.",1],
+["epistemic","adj.","Relating to knowledge and how we justify it.","There is epistemic uncertainty in any small sample.",1],
+["ontology","n.","A formal model of what exists and how concepts relate.","The knowledge graph is built on a shared ontology.",1],
+["a priori","adv.","Known by reasoning alone, before observation.","You can rule that out a priori — it contradicts the spec.",1],
+["parsimonious","adj.","Using the fewest assumptions or resources; elegantly simple.","Prefer the parsimonious model unless data demands more.",1],
+["spurious","adj.","Seemingly valid but actually false or coincidental.","Ice cream sales and drownings show a spurious correlation.",1],
+["salient","adj.","Most noticeable or important.","Summarise the salient points in the abstract.",1],
+["cogent","adj.","Clear, logical and convincing.","She made a cogent case for rewriting the module.",1],
+["tacit","adj.","Understood without being stated.","There was a tacit agreement not to push on Fridays.",1],
+["ostensibly","adv.","Apparently, on the surface — but perhaps not really.","Ostensibly a refactor, the PR quietly changed behaviour.",1],
+["dichotomy","n.","A division into two opposed groups or ideas.","The theory-versus-practice dichotomy is often overstated.",1],
+["paradigm","n.","A dominant framework of thinking.","Functional programming is a different paradigm entirely.",1],
+["reductive","adj.","Oversimplified to the point of distortion.","Calling the brain 'just a computer' is reductive.",1],
+["holistic","adj.","Treating something as a whole rather than parts.","Take a holistic view of performance, not one metric.",1],
+["emergent","adj.","Arising from many simple interactions, not designed in.","Flocking is emergent behaviour from three simple rules.",1],
+["apophenia","n.","Seeing meaningful patterns in random data.","Overfitting is apophenia, formalised.",1],
+["confound","n.","A hidden variable that distorts an apparent relationship.","Age is a confound in that study's results.",1],
+["heterodox","adj.","Departing from accepted beliefs or standards.","A heterodox take: code comments are usually a smell.",1],
+["seminal","adj.","Strongly influencing later developments.","Shannon's 1948 paper is the seminal work of information theory.",1],
+["erudite","adj.","Showing deep, wide-ranging knowledge.","Her erudite lecture ranged from Gödel to Turing.",1],
+["terse","adj.","Using few words; brusquely concise.","His code review comments were terse but fair.",2],
+["verbose","adj.","Using more words (or output) than needed.","Run it with the verbose flag to see every step.",2],
+["succinct","adj.","Briefly and clearly expressed.","A succinct summary beats a thorough ramble.",2],
+["pedantic","adj.","Fussy about minor rules and details.","At the risk of being pedantic, it is O(n log n), not O(n).",2],
+["esoteric","adj.","Understood by only a small, specialised group.","Brainfuck is an esoteric programming language by design.",2],
+["arcane","adj.","Mysterious and known to few; obscure.","The build system fails for arcane reasons on Tuesdays.",2],
+["obfuscate","v.","To deliberately make unclear or hard to read.","Minifiers obfuscate code as a side effect.",2],
+["elucidate","v.","To make clear; to explain.","The diagram elucidates what three paragraphs could not.",2],
+["superfluous","adj.","Beyond what is needed; unnecessary.","Delete the superfluous imports before committing.",2],
+["ubiquitous","adj.","Present everywhere at once.","Smartphones made computing ubiquitous.",2],
+["pragmatic","adj.","Guided by practical results rather than theory.","The pragmatic fix ships today; the elegant one, next month.",2],
+["meticulous","adj.","Extremely careful about detail.","Meticulous commit messages pay off six months later.",2],
+["candid","adj.","Honest and direct, even when awkward.","Give me your candid opinion of the design.",2],
+["prolific","adj.","Producing a great deal.","A prolific open-source contributor.",2],
+["tenacious","adj.","Persistent; refusing to give up.","Debugging rewards the tenacious.",2],
+["serendipity","n.","A happy accident; finding good things unsought.","The feature came from pure serendipity during a demo.",2],
+["quintessential","adj.","The most perfect example of something.","Vim versus Emacs is the quintessential nerd argument.",2]
+];
+/* [fact, category] */
+const FACTS=[
+["Octopuses have three hearts — two pump blood to the gills, one to the body. The main heart stops when they swim, which is why they prefer crawling.","Nature"],
+["Honey never spoils. Pots found in 3,000-year-old Egyptian tombs were still perfectly edible.","Science"],
+["The Eiffel Tower grows about 15 cm taller in summer as the iron expands in the heat.","Science"],
+["The first computer 'bug' was literal: a moth stuck in a relay of the Harvard Mark II in 1947. The team taped it into the logbook.","Tech"],
+["There are more possible games of chess than atoms in the observable universe — the Shannon number is around 10^120.","Maths"],
+["Bananas are mildly radioactive thanks to potassium-40. There's even an informal unit: the Banana Equivalent Dose.","Science"],
+["Sharks are older than trees — they've existed for about 450 million years, trees only about 385 million.","Nature"],
+["The University of Oxford is older than the Aztec Empire. Teaching began by 1096; Tenochtitlan was founded in 1325.","History"],
+["The word 'robot' comes from the Czech 'robota', meaning forced labour — coined in Karel Čapek's 1920 play R.U.R.","Language"],
+["The Windows 95 startup sound was composed by Brian Eno — on a Mac.","Tech"],
+["Google's search engine was originally called BackRub.","Tech"],
+["The world's first webcam watched a coffee pot at Cambridge, so researchers could avoid a wasted trip to an empty pot.","Tech"],
+["Wombats produce cube-shaped droppings — the shape stops them rolling away when marking territory.","Nature"],
+["Scotland's national animal is the unicorn — chosen for its associations with purity and power.","History"],
+["A day on Venus is longer than its year: it rotates once every 243 Earth days but orbits the Sun in 225.","Space"],
+["A lightning bolt is about five times hotter than the surface of the Sun — roughly 30,000 °C.","Science"],
+["GPS satellites must correct for Einstein's relativity. Without it, positions would drift by around 10 km per day.","Science"],
+["Shakespeare popularised hundreds of English words and phrases, including 'eyeball', 'lonely' and 'wild-goose chase'.","Language"],
+["Botanically, avocados and bananas are berries — but strawberries are not.","Nature"],
+["A teaspoon of neutron star material would weigh around four billion tonnes on Earth.","Space"],
+["Under some conditions hot water freezes faster than cold — the Mpemba effect, still not fully explained.","Science"],
+["Your body contains roughly 37 trillion cells, and most of them are replaced over your lifetime.","Body"],
+["Your stomach lining replaces itself every few days — otherwise it would digest itself.","Body"],
+["There are more trees on Earth (about 3 trillion) than stars in the Milky Way (100-400 billion).","Nature"],
+["The Sun holds about 99.86% of all the mass in the solar system.","Space"],
+["ENIAC, one of the first general-purpose computers (1945), weighed about 27 tonnes and filled a room.","Tech"],
+["The first email was sent in 1971 by Ray Tomlinson — who also chose the @ symbol for addresses.","Tech"],
+["The QWERTY layout was designed partly to space out common letter pairs so mechanical typewriter arms wouldn't jam.","Tech"],
+["Cleopatra lived closer in time to the Moon landing than to the building of the Great Pyramid.","History"],
+["Honeybees can learn to recognise individual human faces.","Nature"],
+["The Moon drifts about 3.8 cm further from Earth every year.","Space"],
+["'Set' is one of the English words with the most dictionary definitions — hundreds of senses in the OED.","Language"],
+["Finland has around 188,000 lakes — roughly one for every 30 people.","World"],
+["The Sahara was green savannah with lakes just 6,000 years ago.","World"],
+["Your brain runs on about 20 watts — a fifth of your energy — roughly the power of a dim light bulb.","Body"],
+["Ada Lovelace published the first algorithm intended for a machine in 1843, a century before computers existed.","Tech"],
+["Weight for weight, spider silk is stronger than steel and tougher than Kevlar.","Nature"],
+["The first website ever made is still online at info.cern.ch.","Tech"],
+["Bluetooth is named after a 10th-century Viking king, Harald 'Bluetooth' Gormsson, who united Denmark and Norway.","Tech"],
+["The record for reciting digits of pi from memory stands at over 70,000 digits.","Maths"],
+["Zero was first treated as a proper number in India — Brahmagupta set out its rules in 628 AD.","Maths"],
+["A group of flamingos is called a 'flamboyance'.","Language"],
+["Mount Everest grows about 4 mm taller every year as India pushes into Asia.","World"],
+["The Great Wall of China is not visible from the Moon — that one is a myth.","History"],
+["Octopus blood is blue because it uses copper-based haemocyanin instead of iron-based haemoglobin.","Nature"],
+["Tardigrades (water bears) have survived direct exposure to the vacuum of space.","Nature"],
+["The @ symbol is called 'snail' in Italian and 'monkey tail' in Dutch.","Language"],
+["A million seconds is about 11.6 days. A billion seconds is about 31.7 years.","Maths"]
+];
+
+/* ================= QUIZ MODULE ================= */
+const Quiz={
+  cfg:{mode:'bank',cat:-1,diff:-1,len:10},
+  cur:null,
+  stats(){return store.get('qstats',{plays:0,best:0,answered:0,correct:0,byCat:{}});},
+  save(s){store.set('qstats',s);},
+  recordAnswer(catIdx,ok){const s=this.stats();s.answered++;if(ok)s.correct++;const k=typeof catIdx==='number'?QUIZ_CATS[catIdx]:String(catIdx);s.byCat[k]=s.byCat[k]||[0,0];s.byCat[k][1]++;if(ok)s.byCat[k][0]++;this.save(s);}
+};
+const OTDB_CATS=[["","Any topic"],["9","General"],["17","Science"],["18","Computers"],["22","Geography"],["23","History"],["21","Sport"],["11","Film"]];
+function quizSetupHTML(){
+  const c=Quiz.cfg;const s=Quiz.stats();
+  const acc=s.answered?Math.round(100*s.correct/s.answered):0;
+  const catChips=c.mode==='bank'
+    ?['<button class="chip'+(c.cat===-1?' on':'')+'" data-qcat="-1">All topics</button>'].concat(QUIZ_CATS.map((n,i)=>'<button class="chip'+(c.cat===i?' on':'')+'" data-qcat="'+i+'">'+n+'</button>')).join('')
+    :OTDB_CATS.map(o=>'<button class="chip'+(String(c.cat)===o[0]?' on':'')+'" data-qcat="'+o[0]+'">'+o[1]+'</button>').join('');
+  return '<h2 class="section">General knowledge quiz</h2>'+
+  '<div class="card">'+
+    '<div class="setup-block"><div class="lbl">Source</div><div class="chiprow" style="margin:0">'+
+      '<button class="chip'+(c.mode==='bank'?' on':'')+'" data-qmode="bank">Cortex bank · '+QUIZ.length+' questions</button>'+
+      '<button class="chip'+(c.mode==='online'?' on':'')+'" data-qmode="online">Online · endless (Open Trivia DB)</button></div></div>'+
+    '<div class="setup-block"><div class="lbl">Topic</div><div class="chiprow" style="margin:0">'+catChips+'</div></div>'+
+    '<div class="setup-block"><div class="lbl">Difficulty</div><div class="chiprow" style="margin:0">'+
+      [['-1','Mixed'],['0','Easy'],['1','Medium'],['2','Hard']].map(d=>'<button class="chip'+(String(c.diff)===d[0]?' on':'')+'" data-qdiff="'+d[0]+'">'+d[1]+'</button>').join('')+'</div></div>'+
+    '<div class="setup-block"><div class="lbl">Length</div><div class="chiprow" style="margin:0">'+
+      [5,10,15].map(n=>'<button class="chip'+(c.len===n?' on':'')+'" data-qlen="'+n+'">'+n+' questions</button>').join('')+'</div></div>'+
+    '<button class="btn primary" id="quizStart">Start quiz</button>'+
+  '</div>'+
+  '<div class="card" style="margin-top:16px"><div class="card-head"><span class="eyebrow">Your all-time stats</span>'+
+    (s.answered?'<button class="btn small" id="quizReset">Reset</button>':'')+'</div>'+
+    '<div class="stat-tiles">'+
+      '<div class="stat-tile"><div class="v">'+s.plays+'</div><div class="l">Rounds</div></div>'+
+      '<div class="stat-tile"><div class="v">'+s.best+'%</div><div class="l">Best round</div></div>'+
+      '<div class="stat-tile"><div class="v">'+acc+'%</div><div class="l">Accuracy</div></div>'+
+      '<div class="stat-tile"><div class="v">'+s.answered+'</div><div class="l">Answered</div></div></div>'+
+    (Object.keys(s.byCat).length?'<hr class="divider">'+Object.entries(s.byCat).map(e=>{
+      const p=e[1][1]?Math.round(100*e[1][0]/e[1][1]):0;
+      return '<div class="catbar"><span class="nm">'+esc(e[0])+'</span><div class="track"><i style="width:'+p+'%"></i></div><span class="pc">'+p+'%</span></div>';
+    }).join(''):'<p class="muted">Answer questions to build up your category breakdown.</p>')+
+  '</div>';
+}
+function renderQuizSetup(){
+  const sh=$('#quizShell');sh.innerHTML=quizSetupHTML();
+  $$('[data-qmode]',sh).forEach(b=>b.onclick=()=>{Quiz.cfg.mode=b.dataset.qmode;Quiz.cfg.cat=Quiz.cfg.mode==='bank'?-1:'';renderQuizSetup();});
+  $$('[data-qcat]',sh).forEach(b=>b.onclick=()=>{Quiz.cfg.cat=Quiz.cfg.mode==='bank'?+b.dataset.qcat:b.dataset.qcat;renderQuizSetup();});
+  $$('[data-qdiff]',sh).forEach(b=>b.onclick=()=>{Quiz.cfg.diff=+b.dataset.qdiff;renderQuizSetup();});
+  $$('[data-qlen]',sh).forEach(b=>b.onclick=()=>{Quiz.cfg.len=+b.dataset.qlen;renderQuizSetup();});
+  $('#quizStart').onclick=startQuiz;
+  const r=$('#quizReset');if(r)r.onclick=()=>{if(confirm('Reset all quiz stats?')){store.set('qstats',{plays:0,best:0,answered:0,correct:0,byCat:{}});renderQuizSetup();}};
+}
+async function startQuiz(){
+  const c=Quiz.cfg;const sh=$('#quizShell');
+  let qs=[];
+  if(c.mode==='bank'){
+    let pool=QUIZ.filter(q=>(c.cat===-1||q[0]===c.cat)&&(c.diff===-1||q[1]===c.diff));
+    if(pool.length<3)pool=QUIZ.filter(q=>c.cat===-1||q[0]===c.cat);
+    qs=shuffle(pool).slice(0,c.len).map(q=>{
+      const order=shuffle([0,1,2,3]);
+      return{q:q[2],opts:order.map(i=>q[3][i]),ans:order.indexOf(q[4]),cat:QUIZ_CATS[q[0]],catIdx:q[0],expl:q[5]};
+    });
+    if(!qs.length){toast('No questions match those filters');return;}
+    playQuiz(qs);
+  }else{
+    sh.innerHTML='<div class="card" style="text-align:center;padding:50px"><span class="spin"></span><p class="muted" style="margin-top:12px">Fetching fresh questions from Open Trivia DB…</p></div>';
+    try{
+      let url='https://opentdb.com/api.php?amount='+c.len+'&type=multiple';
+      if(c.cat)url+='&category='+c.cat;
+      if(c.diff!==-1)url+='&difficulty='+['easy','medium','hard'][c.diff];
+      const r=looseJSON(await webGet(url));
+      if(!r.results||!r.results.length)throw new Error('No questions returned — try different filters');
+      qs=r.results.map(it=>{
+        const correct=decodeEnt(it.correct_answer);
+        const opts=shuffle([correct].concat(it.incorrect_answers.map(decodeEnt)));
+        return{q:decodeEnt(it.question),opts,ans:opts.indexOf(correct),cat:decodeEnt(it.category),catIdx:'Online',expl:''};
+      });
+      playQuiz(qs);
+    }catch(e){
+      sh.innerHTML='<div class="err"><span>Couldn’t reach the trivia service ('+esc(e.message)+').</span><button class="btn small" id="qRetry">Back</button></div>';
+      $('#qRetry').onclick=renderQuizSetup;
+    }
+  }
+}
+function playQuiz(qs){
+  Quiz.cur={qs,i:0,score:0};
+  renderQuestion();
+}
+function renderQuestion(){
+  const st=Quiz.cur;const q=st.qs[st.i];const sh=$('#quizShell');
+  sh.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><span class="tiny" style="font-weight:700">Question '+(st.i+1)+' of '+st.qs.length+'</span><span class="badge plain">'+esc(q.cat)+'</span></div>'+
+  '<div class="qprog"><i style="width:'+Math.round(100*st.i/st.qs.length)+'%"></i></div>'+
+  '<div class="qtext">'+esc(q.q)+'</div>'+
+  '<div class="opts">'+q.opts.map((o,i)=>'<button class="opt" data-i="'+i+'"><span class="letter">'+'ABCD'[i]+'</span><span>'+esc(o)+'</span></button>').join('')+'</div>'+
+  '<div class="expl" id="qExpl"></div>'+
+  '<div class="quiz-foot"><button class="btn small" id="qQuit">Quit</button><button class="btn primary" id="qNext" style="visibility:hidden">'+(st.i+1===st.qs.length?'See results':'Next')+'</button></div>';
+  $('#qQuit').onclick=renderQuizSetup;
+  $$('#quizShell .opt').forEach(b=>b.onclick=()=>{
+    const pick=+b.dataset.i;const ok=pick===q.ans;
+    if(ok)st.score++;
+    Quiz.recordAnswer(q.catIdx,ok);
+    $$('#quizShell .opt').forEach(o=>{o.disabled=true;const i=+o.dataset.i;if(i===q.ans)o.classList.add('correct');else if(i===pick)o.classList.add('wrong');});
+    const ex=$('#qExpl');
+    ex.style.display='block';
+    ex.innerHTML=(ok?'<b>Correct.</b> ':'<b>Not quite — it was '+esc(q.opts[q.ans])+'.</b> ')+esc(q.expl||'');
+    $('#qNext').style.visibility='visible';
+    $('#qNext').onclick=()=>{st.i++;st.i<st.qs.length?renderQuestion():renderResults();};
+  });
+}
+function renderResults(){
+  const st=Quiz.cur;const pct=Math.round(100*st.score/st.qs.length);
+  const s=Quiz.stats();s.plays++;if(pct>s.best)s.best=pct;Quiz.save(s);
+  const grade=pct>=90?'Outstanding. Genuinely sharp.':pct>=70?'Strong round — nicely done.':pct>=50?'Solid — the rematch beckons.':'Warming up. Run it back.';
+  $('#quizShell').innerHTML='<div class="card" style="text-align:center;padding:40px 24px">'+
+    '<div class="eyebrow">Round complete</div>'+
+    '<div class="score-big">'+st.score+'<span style="font-size:26px;color:var(--ink3)">/'+st.qs.length+'</span></div>'+
+    '<p style="font-family:var(--serif);font-size:18px;margin:8px 0 2px">'+pct+'% — '+grade+'</p>'+
+    '<p class="tiny">Best round: '+s.best+'% · Rounds played: '+s.plays+'</p>'+
+    '<div style="display:flex;gap:10px;justify-content:center;margin-top:20px">'+
+    '<button class="btn primary" id="qAgain">Play again</button><button class="btn" id="qBack">Change settings</button></div></div>';
+  $('#qAgain').onclick=startQuiz;$('#qBack').onclick=renderQuizSetup;
+}
+function initQuiz(){renderQuizSetup();}
+
+/* ================= WORDS MODULE ================= */
+let wordFilter='all';
+function masteredSet(){return new Set(store.get('words',{m:[]}).m);}
+function toggleMastered(i){const w=store.get('words',{m:[]});const ix=w.m.indexOf(i);ix>=0?w.m.splice(ix,1):w.m.push(i);store.set('words',w);renderWordList();renderWordProgress();}
+function renderWordProgress(){const m=masteredSet();const p=Math.round(100*m.size/WORDS.length);$('#wordsProgTxt').textContent=m.size+' / '+WORDS.length+' mastered';$('#wordsProgBar').style.width=p+'%';}
+function renderWordList(){
+  const m=masteredSet();const q=($('#wordSearch').value||'').toLowerCase();
+  const rows=WORDS.map((w,i)=>({w,i})).filter(x=>{
+    if(wordFilter==='learning'&&m.has(x.i))return false;
+    if(wordFilter==='mastered'&&!m.has(x.i))return false;
+    if(wordFilter==='cs'&&x.w[4]!==0)return false;
+    if(q&&!(x.w[0]+' '+x.w[2]).toLowerCase().includes(q))return false;
+    return true;
+  });
+  $('#wordList').innerHTML=rows.length?rows.map(x=>{
+    const done=m.has(x.i);
+    return '<div class="word-row"><div><h3>'+esc(x.w[0])+'<span class="pos">'+esc(x.w[1])+'</span> <span class="badge '+(x.w[4]===0?'blue':x.w[4]===1?'violet':'plain')+'">'+WORD_TAGS[x.w[4]]+'</span></h3>'+
+    '<p>'+esc(x.w[2])+'</p><div class="ex">“'+esc(x.w[3])+'”</div></div>'+
+    '<button class="btn small mastered-btn'+(done?' done':'')+'" data-wi="'+x.i+'">'+(done?'Mastered ✓':'Mark mastered')+'</button></div>';
+  }).join(''):'<p class="muted" style="padding:18px 0">Nothing here — adjust the filter.</p>';
+  $$('#wordList .mastered-btn').forEach(b=>b.onclick=()=>toggleMastered(+b.dataset.wi));
+}
+function startFlashcards(){
+  const m=masteredSet();
+  let pool=WORDS.map((w,i)=>({w,i})).filter(x=>!m.has(x.i));
+  if(!pool.length)pool=WORDS.map((w,i)=>({w,i}));
+  const deck=shuffle(pool).slice(0,12);
+  let i=0,knew=0;
+  $('#wordListArea').style.display='none';const fa=$('#flashArea');fa.style.display='block';
+  function card(){
+    if(i>=deck.length){
+      fa.innerHTML='<div class="flash"><div class="flash-card"><div class="eyebrow green">Session complete</div><div class="flash-word">'+knew+' / '+deck.length+'</div><p class="muted">marked as known this round</p></div><button class="btn primary" id="fcDone">Back to vault</button></div>';
+      $('#fcDone').onclick=endFlash;return;
+    }
+    const x=deck[i];
+    fa.innerHTML='<div class="flash"><p class="tiny" style="font-weight:700">Card '+(i+1)+' of '+deck.length+'</p>'+
+    '<div class="flash-card"><span class="badge '+(x.w[4]===0?'blue':x.w[4]===1?'violet':'plain')+'">'+WORD_TAGS[x.w[4]]+'</span>'+
+    '<div class="flash-word">'+esc(x.w[0])+'</div><div class="wod-pos">'+esc(x.w[1])+'</div><div id="fcBack" style="display:none"><p style="font-size:15.5px;margin-bottom:8px">'+esc(x.w[2])+'</p><p class="muted" style="font-style:italic">“'+esc(x.w[3])+'”</p></div></div>'+
+    '<div style="display:flex;gap:10px;justify-content:center" id="fcBtns"><button class="btn primary" id="fcReveal">Reveal</button><button class="btn" id="fcSkip">End session</button></div></div>';
+    $('#fcSkip').onclick=endFlash;
+    $('#fcReveal').onclick=()=>{
+      $('#fcBack').style.display='block';
+      $('#fcBtns').innerHTML='<button class="btn primary" id="fcKnew">Knew it</button><button class="btn" id="fcLearn">Still learning</button>';
+      $('#fcKnew').onclick=()=>{knew++;const w=store.get('words',{m:[]});if(!w.m.includes(x.i))w.m.push(x.i);store.set('words',w);i++;card();};
+      $('#fcLearn').onclick=()=>{i++;card();};
+    };
+  }
+  card();
+  function endFlash(){fa.style.display='none';$('#wordListArea').style.display='block';renderWordList();renderWordProgress();}
+}
+function initWords(){
+  renderWordProgress();renderWordList();
+  $('#wordSearch').oninput=renderWordList;
+  $$('#wordFilters .chip').forEach(c=>c.onclick=()=>{wordFilter=c.dataset.wf;$$('#wordFilters .chip').forEach(x=>x.classList.toggle('on',x===c));renderWordList();});
+  $('#startFlash').onclick=startFlashcards;
+}
+
+/* ================= FACTS MODULE ================= */
+let factCat='All';
+function renderFactHero(f){$('#factOfDay').textContent=f[0];}
+function renderFactList(){
+  const cats=['All'].concat(Array.from(new Set(FACTS.map(f=>f[1]))));
+  $('#factCats').innerHTML=cats.map(c=>'<button class="chip'+(c===factCat?' on':'')+'" data-fc="'+c+'">'+c+'</button>').join('');
+  $$('#factCats .chip').forEach(b=>b.onclick=()=>{factCat=b.dataset.fc;renderFactList();});
+  const list=FACTS.filter(f=>factCat==='All'||f[1]===factCat);
+  $('#factCount').textContent=list.length+' facts';
+  $('#factList').innerHTML=list.map(f=>'<div class="fact-item"><span class="badge teal">'+esc(f[1])+'</span><span>'+esc(f[0])+'</span></div>').join('');
+}
+function initFacts(){
+  renderFactHero(seedPick(FACTS,'fact'));
+  $('#shuffleFact').onclick=()=>renderFactHero(FACTS[Math.floor(Math.random()*FACTS.length)]);
+  renderFactList();renderOTDFull();
+}
+
+/* ================= MARKETS MODULE ================= */
+const Markets={
+  data:null,at:0,chart:null,
+  async fetchAll(force){
+    const since=Math.floor(Date.now()/1000)-8*86400;
+    const jobs={
+      gold:getJSON('https://api.gold-api.com/price/XAU','mk_xau',10,force),
+      silver:getJSON('https://api.gold-api.com/price/XAG','mk_xag',10,force),
+      fx:getJSON('https://api.frankfurter.dev/v1/latest?from=GBP&to=USD,EUR','mk_fx',60,force),
+      btc:getJSON('https://api.kraken.com/0/public/OHLC?pair=XBTUSD&interval=1440&since='+since,'mk_btc',10,force),
+      eth:getJSON('https://api.kraken.com/0/public/OHLC?pair=ETHUSD&interval=1440&since='+since,'mk_eth',10,force)
+    };
+    const out={};const errs=[];
+    for(const k of Object.keys(jobs)){
+      try{out[k]=(await jobs[k]).data;}catch(e){out[k]=null;errs.push(k);}
+    }
+    const parseK=d=>{
+      if(!d||!d.result)return null;
+      const key=Object.keys(d.result).find(x=>x!=='last');
+      const c=(d.result[key]||[]);if(!c.length)return null;
+      const closes=c.map(r=>+r[4]);const times=c.map(r=>r[0]*1000);
+      const p=closes[closes.length-1];const prev=closes.length>1?closes[closes.length-2]:p;
+      return{p,chg:prev?100*(p-prev)/prev:0,closes,times};
+    };
+    this.data={
+      gold:out.gold?{p:out.gold.price,at:out.gold.updatedAt}:null,
+      silver:out.silver?{p:out.silver.price}:null,
+      fx:out.fx?{usd:out.fx.rates&&out.fx.rates.USD,eur:out.fx.rates&&out.fx.rates.EUR}:null,
+      btc:parseK(out.btc),eth:parseK(out.eth),errs
+    };
+    this.at=Date.now();
+    return this.data;
+  },
+  chgBadge(c){const up=c>=0;return '<span class="chg '+(up?'up':'down')+'">'+(up?'▲':'▼')+' '+Math.abs(c).toFixed(2)+'% today</span>';},
+  async loadMini(){
+    try{
+      const d=this.data||await this.fetchAll(false);
+      const gbp=d.fx&&d.fx.usd?1/d.fx.usd:null;
+      const tiles=[];
+      if(d.gold)tiles.push(['Gold /oz',fmtMoney(d.gold.p,'USD'),gbp?'≈ '+fmtMoney(d.gold.p*gbp,'GBP'):'']);
+      if(d.btc)tiles.push(['Bitcoin',fmtMoney(d.btc.p,'USD'),this.chgBadge(d.btc.chg)]);
+      if(d.fx&&d.fx.usd)tiles.push(['GBP → USD','$'+d.fx.usd.toFixed(4),'£1 buys $'+d.fx.usd.toFixed(2)]);
+      if(d.eth)tiles.push(['Ethereum',fmtMoney(d.eth.p,'USD'),this.chgBadge(d.eth.chg)]);
+      $('#miniMarkets').innerHTML=tiles.length?tiles.map(t=>'<div class="mini-tile"><div class="lbl">'+t[0]+'</div><div class="val">'+t[1]+'</div><div class="chg" style="color:var(--ink3);font-weight:600">'+t[2]+'</div></div>').join(''):'<p class="muted">Market data unavailable right now.</p>';
+    }catch(e){$('#miniMarkets').innerHTML='<p class="muted">Market data unavailable ('+esc(e.message)+').</p>';}
+  },
+  async renderFull(force){
+    const g=$('#mkGrid');
+    if(force||!this.data){g.innerHTML='<div class="skel" style="height:110px"></div>'.repeat(6);try{await this.fetchAll(force);}catch(e){}}
+    const d=this.data;
+    if(!d){g.innerHTML='<div class="err" style="grid-column:1/-1"><span>Couldn’t load market data.</span><button class="btn small" onclick="Markets.renderFull(true)">Retry</button></div>';return;}
+    const gbp=d.fx&&d.fx.usd?1/d.fx.usd:null;
+    const cards=[];
+    cards.push(d.gold?['Gold (XAU/oz)',fmtMoney(d.gold.p,'USD'),gbp?'≈ '+fmtMoney(d.gold.p*gbp,'GBP')+' per ounce':'','gold']:null);
+    cards.push(d.silver?['Silver (XAG/oz)',fmtMoney(d.silver.p,'USD'),gbp?'≈ '+fmtMoney(d.silver.p*gbp,'GBP')+' per ounce':'','']:null);
+    cards.push(d.btc?['Bitcoin (BTC)',fmtMoney(d.btc.p,'USD'),gbp?'≈ '+fmtMoney(d.btc.p*gbp,'GBP')+' per coin':'','btc',d.btc.chg]:null);
+    cards.push(d.eth?['Ethereum (ETH)',fmtMoney(d.eth.p,'USD'),gbp?'≈ '+fmtMoney(d.eth.p*gbp,'GBP')+' per coin':'','eth',d.eth.chg]:null);
+    if(d.fx&&d.fx.usd)cards.push(['Pound → Dollar','$'+d.fx.usd.toFixed(4),'£1 = $'+d.fx.usd.toFixed(4),'fx']);
+    if(d.fx&&d.fx.eur)cards.push(['Pound → Euro','€'+d.fx.eur.toFixed(4),'£1 = €'+d.fx.eur.toFixed(4),'fx']);
+    g.innerHTML=cards.filter(Boolean).map(c=>'<div class="mk-card"><div class="nm"><span>'+c[0]+'</span>'+(c.length>4?this.chgBadge(c[4]):'')+'</div><div class="px">'+c[1]+'</div><div class="sub2">'+c[2]+'</div></div>').join('')||'<p class="muted">No data.</p>';
+    $('#mkUpdated').textContent='Updated '+new Date(this.at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+(d.errs&&d.errs.length?' · some sources offline':'');
+    this.ensureChart();
+    this.loadMini();
+  },
+  ensureChart(){
+    if(!this.data||!this.data.btc||typeof Chart==='undefined')return;
+    if(!$('#view-markets').classList.contains('active'))return;
+    const b=this.data.btc;
+    const labels=b.times.map(t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'}));
+    $('#btcChartNote').textContent='Kraken daily closes';
+    if(this.chart){this.chart.data.labels=labels;this.chart.data.datasets[0].data=b.closes;this.chart.update();return;}
+    this.chart=new Chart($('#btcChart'),{type:'line',
+      data:{labels,datasets:[{data:b.closes,borderColor:'#1d4ed8',backgroundColor:'rgba(29,78,216,.07)',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#1d4ed8',borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' $'+Number(c.parsed.y).toLocaleString()}}},
+      scales:{y:{grid:{color:'#eeebe2'},ticks:{callback:v=>'$'+Math.round(v/1000)+'k'}},x:{grid:{display:false}}}}});
+  }
+};
+function initMarkets(){
+  Markets.renderFull(false);
+  $('#mkRefresh').onclick=()=>Markets.renderFull(true);
+}
+
+/* ================= BOOT ================= */
+function boot(){
+  initMast();
+  $$('#navTabs .tab').forEach(b=>b.onclick=()=>show(b.dataset.view));
+  try{initToday();}catch(e){toast('Something went wrong loading Today: '+e.message);}
+}
+boot();
+</script>
+</body>
+</html>
