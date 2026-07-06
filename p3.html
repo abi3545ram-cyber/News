@@ -1,0 +1,273 @@
+<script>
+/* ============================================================
+   CORTEX — daily knowledge hub
+   Data flows through window.cowork.callMcpTool (web_fetch + Apple Notes).
+   Quiz bank, word vault and fact library are embedded and work offline.
+   ============================================================ */
+'use strict';
+
+/* ---------- tiny helpers ---------- */
+const $=(s,r)=> (r||document).querySelector(s);
+const $$=(s,r)=> Array.from((r||document).querySelectorAll(s));
+const esc=s=> String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const decodeEnt=s=>{const d=document.createElement('div');d.innerHTML=String(s||'');return d.textContent||'';};
+const stripTags=s=>{const d=document.createElement('div');d.innerHTML=String(s||'');return (d.textContent||'').replace(/\s+/g,' ').trim();};
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600);}
+function timeAgo(d){if(!d||isNaN(d))return'';const s=(Date.now()-d.getTime())/1e3;if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function seedNum(salt){const s=todayKey()+'|'+salt;let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return Math.abs(h);}
+const seedPick=(arr,salt)=>arr[seedNum(salt)%arr.length];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const store={get(k,f){try{const v=localStorage.getItem('cx_'+k);return v==null?f:JSON.parse(v);}catch(e){return f;}},set(k,v){try{localStorage.setItem('cx_'+k,JSON.stringify(v));}catch(e){}}};
+const fmtMoney=(n,cur)=>(cur==='GBP'?'£':'$')+Number(n).toLocaleString('en-GB',{maximumFractionDigits:n>=100?0:2,minimumFractionDigits:n>=100?0:2});
+
+/* ---------- network layer (all via MCP) ---------- */
+async function mcpCall(tool,args){
+  if(!window.cowork||!window.cowork.callMcpTool) throw new Error('MCP bridge unavailable');
+  const r=await Promise.race([
+    window.cowork.callMcpTool(tool,args||{}),
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timed out')),25000))
+  ]);
+  if(r&&r.isError){throw new Error(stripTags((r.content&&r.content[0]&&r.content[0].text)||'Tool error').slice(0,140));}
+  if(r&&r.structuredContent!==undefined&&r.structuredContent!==null)return r.structuredContent;
+  return (r&&r.content&&r.content[0]&&r.content[0].text)||'';
+}
+async function fetchDirect(url){
+  const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),12000);
+  try{
+    const r=await fetch(url,{signal:ctl.signal,cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return await r.text();
+  }finally{clearTimeout(tm);}
+}
+const PROXIES=[
+  u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
+  u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
+  u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u)
+];
+/* Direct internet first; CORS proxies second (needed for RSS feeds); MCP bridge as a last resort. */
+async function webGet(url){
+  let last=null;
+  try{const t=await fetchDirect(url);if(t&&t.length>10)return t;last=new Error('empty response');}catch(e){last=e;}
+  for(const p of PROXIES){
+    try{const t=await fetchDirect(p(url));if(t&&t.length>10)return t;}catch(e){last=e;}
+  }
+  try{const t=await mcpCall('mcp__workspace__web_fetch',{url});const s=typeof t==='string'?t:JSON.stringify(t);if(s&&s.length>10)return s;}catch(e){last=e;}
+  throw new Error((last&&last.message)||'network unavailable');
+}
+function looseJSON(s){
+  if(typeof s!=='string')return s;
+  let i=s.indexOf('{');const j=s.indexOf('[');
+  if(i<0||(j>=0&&j<i))i=j;
+  if(i<0)throw new Error('No JSON in response');
+  return JSON.parse(s.slice(i).trim());
+}
+function looseXML(s){
+  let i=s.search(/<\?xml|<rss[\s>]|<feed[\s>]/);
+  if(i<0)i=s.indexOf('<');
+  if(i<0)throw new Error('No XML in response');
+  return new DOMParser().parseFromString(s.slice(i),'text/xml');
+}
+async function getJSON(url,cacheKey,ttlMin,force){
+  const c=cacheKey?store.get('cache_'+cacheKey,null):null;
+  if(c&&!force&&Date.now()-c.t<ttlMin*60000)return{data:c.d,cached:false,at:c.t};
+  try{const d=looseJSON(await webGet(url));if(cacheKey)store.set('cache_'+cacheKey,{t:Date.now(),d});return{data:d,cached:false,at:Date.now()};}
+  catch(e){if(c)return{data:c.d,cached:true,at:c.t};throw e;}
+}
+async function askAI(prompt,data){
+  if(!window.cowork||!window.cowork.askClaude)throw new Error('AI not available in this view');
+  const r=await window.cowork.askClaude(prompt,data);
+  if(typeof r==='string')return r;
+  if(r&&typeof r.text==='string')return r.text;
+  if(r&&r.content&&r.content[0]&&r.content[0].text)return r.content[0].text;
+  return String(r);
+}
+
+/* ---------- router ---------- */
+const inited={};
+function show(view){
+  $$('#navTabs .tab').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  $$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+view));
+  const init={news:initNews,quiz:initQuiz,words:initWords,facts:initFacts,markets:initMarkets}[view];
+  if(init&&!inited[view]){inited[view]=true;init();}
+  if(view==='markets')Markets.ensureChart();
+  window.scrollTo({top:0});
+}
+document.addEventListener('keydown',e=>{
+  if(/INPUT|TEXTAREA|SELECT/.test((e.target&&e.target.tagName)||''))return;
+  const m={'1':'today','2':'news','3':'quiz','4':'words','5':'facts','6':'markets'}[e.key];
+  if(m)show(m);
+});
+
+/* ---------- masthead / streak ---------- */
+function initMast(){
+  const now=new Date();
+  $('#mastDate').textContent=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  $('#mastTime').textContent='Brighton · updated '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const h=now.getHours();
+  $('#greeting').textContent=(h<5?'Up late, Abi?':h<12?'Good morning, Abi':h<18?'Good afternoon, Abi':'Good evening, Abi');
+  const st=store.get('streak',{last:null,n:0});
+  const tk=todayKey();
+  if(st.last!==tk){
+    const y=new Date(Date.now()-86400000);
+    const yk=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
+    st.n=(st.last===yk)?st.n+1:1;st.last=tk;store.set('streak',st);
+  }
+  $('#streakTxt').textContent='Day '+st.n;
+  $('#heroSub').textContent=st.n>1?('Day '+st.n+' in a row — here’s everything worth knowing today.'):'Here’s everything worth knowing today.';
+}
+
+/* ---------- news ---------- */
+const NEWS_CATS=[
+  ['top','Top stories','https://feeds.bbci.co.uk/news/rss.xml'],
+  ['world','World','https://feeds.bbci.co.uk/news/world/rss.xml'],
+  ['uk','UK','https://feeds.bbci.co.uk/news/uk/rss.xml'],
+  ['politics','Politics','https://feeds.bbci.co.uk/news/politics/rss.xml'],
+  ['business','Business','https://feeds.bbci.co.uk/news/business/rss.xml'],
+  ['tech','Technology','https://feeds.bbci.co.uk/news/technology/rss.xml'],
+  ['sci','Science','https://feeds.bbci.co.uk/news/science_and_environment/rss.xml'],
+  ['ai','AI','https://news.google.com/rss/search?q=artificial+intelligence&hl=en-GB&gl=GB&ceid=GB:en']
+];
+let newsCat='top', newsItems=[];
+function parseFeed(xmlText,fallbackSrc){
+  const doc=looseXML(xmlText);
+  const out=[];const seen={};
+  $$('item, entry',doc).forEach(it=>{
+    const g=t=>{const n=it.querySelector(t);return n?n.textContent:'';};
+    let title=decodeEnt(g('title')).trim();
+    let src=(it.querySelector('source')&&it.querySelector('source').textContent)||fallbackSrc;
+    if(src!==fallbackSrc&&title.endsWith(' - '+src))title=title.slice(0,-(' - '+src).length);
+    let link=g('link');
+    if(!link){const l=it.querySelector('link[href]');link=l?l.getAttribute('href'):'';}
+    const desc=stripTags(g('description')||g('summary')).slice(0,220);
+    const when=new Date(g('pubDate')||g('published')||g('updated')||'');
+    if(!title||seen[title])return;seen[title]=1;
+    out.push({title,link:link.trim(),desc,when,src});
+  });
+  out.sort((a,b)=>(b.when-a.when)||0);
+  return out;
+}
+async function loadNews(cat,force){
+  const cfg=NEWS_CATS.find(c=>c[0]===cat);
+  const fallbackSrc=cat==='ai'?'Google News':'BBC News';
+  const ck='news_'+cat;
+  const c=store.get('cache_'+ck,null);
+  if(c&&!force&&Date.now()-c.t<10*60000)return c.items.map(i=>({...i,when:new Date(i.when)}));
+  let items=null,err=null;
+  try{items=parseFeed(await webGet(cfg[2]),fallbackSrc).slice(0,26);if(!items.length)items=null;}catch(e){err=e;}
+  if(!items){
+    /* last-ditch: rss2json converts any feed to CORS-friendly JSON */
+    try{
+      const r=looseJSON(await webGet('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(cfg[2])));
+      if(r&&r.items&&r.items.length)items=r.items.map(it=>({title:decodeEnt(stripTags(it.title)),link:(it.link||'').trim(),desc:stripTags(it.description||'').slice(0,220),when:new Date(it.pubDate||''),src:fallbackSrc})).slice(0,26);
+    }catch(e){err=err||e;}
+  }
+  if(items){store.set('cache_'+ck,{t:Date.now(),items});return items;}
+  if(c)return c.items.map(i=>({...i,when:new Date(i.when)}));
+  throw err||new Error('feed unavailable');
+}
+function renderNews(){
+  const q=($('#newsSearch').value||'').toLowerCase();
+  const list=newsItems.filter(i=>!q||i.title.toLowerCase().includes(q)||i.desc.toLowerCase().includes(q));
+  $('#newsList').innerHTML=list.length?list.map(i=>
+    '<div class="news-item"><h3><a href="'+esc(i.link)+'" target="_blank" rel="noopener">'+esc(i.title)+'</a></h3>'+
+    (i.desc?'<p>'+esc(i.desc)+'</p>':'')+
+    '<div class="news-meta"><span class="src">'+esc(i.src)+'</span><span>·</span><span>'+esc(timeAgo(i.when))+'</span></div></div>'
+  ).join(''):'<p class="muted" style="padding:20px 0">Nothing matches that filter.</p>';
+}
+async function switchNews(cat,force){
+  newsCat=cat;
+  $$('#newsCats .chip').forEach(c=>c.classList.toggle('on',c.dataset.cat===cat));
+  $('#newsList').innerHTML='<div class="skel" style="height:260px"></div>';
+  $('#newsDigestBox').style.display='none';
+  try{newsItems=await loadNews(cat,force);renderNews();}
+  catch(e){$('#newsList').innerHTML='<div class="err"><span>Couldn’t load this feed ('+esc(e.message)+').</span><button class="btn small" onclick="switchNews(newsCat,true)">Retry</button></div>';}
+}
+function initNews(){
+  $('#newsCats').innerHTML=NEWS_CATS.map(c=>'<button class="chip'+(c[0]===newsCat?' on':'')+'" data-cat="'+c[0]+'">'+c[1]+'</button>').join('');
+  $$('#newsCats .chip').forEach(ch=>ch.onclick=()=>switchNews(ch.dataset.cat,false));
+  $('#newsSearch').oninput=renderNews;
+  $('#newsRefresh').onclick=()=>switchNews(newsCat,true);
+  $('#newsDigestBtn').onclick=async()=>{
+    const box=$('#newsDigestBox');box.style.display='block';box.innerHTML='<span class="spin"></span> Summarising '+newsItems.length+' headlines…';
+    try{const r=await askAI('Summarise these news headlines into a crisp briefing of 3 short bullet points (plain text, use •) for a UK computer science student. Under 80 words total.',newsItems.slice(0,14).map(i=>i.title+' — '+i.desc));box.innerHTML=esc(r).replace(/\n/g,'<br>');}
+    catch(e){box.style.display='none';toast(e.message);}
+  };
+  switchNews(newsCat,false);
+}
+
+/* ---------- today ---------- */
+async function initTodayHeadlines(force){
+  const el=$('#todayHeadlines');
+  el.innerHTML='<div class="skel" style="height:120px"></div>';
+  try{
+    const items=(await loadNews('top',force)).slice(0,6);
+    window._todayHeads=items;
+    el.innerHTML=items.map((i,n)=>
+      '<div class="headline-item"><span class="n">'+String(n+1).padStart(2,'0')+'</span><div><h4><a href="'+esc(i.link)+'" target="_blank" rel="noopener">'+esc(i.title)+'</a></h4><div class="news-meta meta"><span class="src">'+esc(i.src)+'</span><span>·</span><span>'+esc(timeAgo(i.when))+'</span></div></div></div>'
+    ).join('');
+  }catch(e){el.innerHTML='<div class="err"><span>Couldn’t load headlines ('+esc(e.message)+').</span><button class="btn small" id="rhx">Retry</button></div>';const b=$('#rhx');if(b)b.onclick=()=>initTodayHeadlines(true);}
+}
+function initWOD(){
+  const w=seedPick(WORDS,'wod');
+  $('#wodTag').textContent=WORD_TAGS[w[4]];
+  $('#wodBox').innerHTML='<div class="wod-word">'+esc(w[0])+'</div><div class="wod-pos">'+esc(w[1])+'</div><div class="wod-def">'+esc(w[2])+'</div><div class="wod-ex">“'+esc(w[3])+'”</div>';
+}
+function renderFact(f){$('#factBox').innerHTML=esc(f[0])+' <span class="badge teal" style="margin-left:4px">'+esc(f[1])+'</span>';}
+function initDailyQ(){
+  const box=$('#dailyQ');
+  let dq=store.get('dq',null);
+  if(!dq||dq.date!==todayKey()){dq={date:todayKey(),idx:seedNum('dq')%QUIZ.length,done:false,correct:false};store.set('dq',dq);}
+  const q=QUIZ[dq.idx];
+  $('#dqCat').textContent=QUIZ_CATS[q[0]];
+  const done=dq.done;
+  box.innerHTML='<div class="qtext" style="font-size:17px;margin-bottom:4px">'+esc(q[2])+'</div><div class="dq-opts">'+
+    q[3].map((o,i)=>'<button class="opt" data-i="'+i+'" '+(done?'disabled':'')+
+    ((done&&i===q[4])?' style="border-color:var(--green);background:var(--green-soft)"':'')+
+    '><span class="letter">'+'ABCD'[i]+'</span><span>'+esc(o)+'</span></button>').join('')+'</div>'+
+    (done?'<p class="tiny" style="margin-top:9px">'+(dq.correct?'You got this one right today. ':'You missed this one today. ')+esc(q[5])+'</p>':'');
+  if(!done)$$('#dailyQ .opt').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;dq.done=true;dq.correct=i===q[4];store.set('dq',dq);
+    Quiz.recordAnswer(q[0],dq.correct);
+    toast(dq.correct?'Correct — nice one.':'Not quite — answer revealed.');
+    initDailyQ();
+  });
+}
+async function initOTD(){
+  const d=new Date();
+  const url='https://byabbe.se/on-this-day/'+(d.getMonth()+1)+'/'+d.getDate()+'/events.json';
+  try{
+    const r=await getJSON(url,'otd_'+todayKey(),720,false);
+    const ev=(r.data.events||[]).filter(e=>e.description);
+    window._otd=ev;
+    const picks=[];const n=ev.length;
+    if(n){const idxs=new Set();for(let k=0;k<9&&idxs.size<Math.min(3,n);k++)idxs.add((seedNum('otd'+k)%n));picks.push(...Array.from(idxs).sort((a,b)=>a-b).map(i=>ev[i]));}
+    $('#otdMini').innerHTML=picks.length?picks.map(e=>'<div class="otd-item"><span class="otd-year">'+esc(e.year)+'</span><span>'+esc(e.description)+'</span></div>').join(''):'<p class="muted">No events found.</p>';
+    renderOTDFull();
+  }catch(e){$('#otdMini').innerHTML='<p class="muted">On-this-day feed unavailable right now.</p>';}
+}
+function renderOTDFull(){
+  const ev=window._otd||[];const box=$('#otdFull');if(!box)return;
+  const d=new Date();$('#otdDate').textContent=d.toLocaleDateString('en-GB',{day:'numeric',month:'long'});
+  if(!ev.length){box.innerHTML='<p class="muted">Nothing loaded yet — check the Today tab first.</p>';return;}
+  const step=Math.max(1,Math.floor(ev.length/12));
+  const picks=ev.filter((_,i)=>i%step===0).slice(0,12);
+  box.innerHTML=picks.map(e=>{
+    const wl=(e.wikipedia&&e.wikipedia[0]&&e.wikipedia[0].wikipedia)||'';
+    return '<div class="otd-item"><span class="otd-year">'+esc(e.year)+'</span><span>'+esc(e.description)+(wl?' <a href="'+esc(wl)+'" target="_blank" rel="noopener" class="tiny">wiki</a>':'')+'</span></div>';
+  }).join('');
+}
+function initToday(){
+  initTodayHeadlines(false);initWOD();renderFact(seedPick(FACTS,'fact'));initDailyQ();initOTD();
+  Markets.loadMini();
+  $('#newFact').onclick=()=>renderFact(FACTS[Math.floor(Math.random()*FACTS.length)]);
+  $('#refreshHeadlines').onclick=()=>initTodayHeadlines(true);
+  $('#aiDigestBtn').onclick=async()=>{
+    const box=$('#aiDigestBox');const items=window._todayHeads||[];
+    if(!items.length){toast('Headlines haven’t loaded yet');return;}
+    box.style.display='block';box.innerHTML='<span class="spin"></span> Writing your digest…';
+    try{const r=await askAI('Turn these headlines into a warm, crisp 3-sentence morning digest for Abi, a UK computer science student. Plain text only.',items.map(i=>i.title));box.innerHTML=esc(r).replace(/\n/g,'<br>');}
+    catch(e){box.style.display='none';toast(e.message);}
+  };
+}
+</script>
