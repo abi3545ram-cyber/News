@@ -1,30 +1,40 @@
-# Cortex — Daily Knowledge Hub
+# Cortex v2 — Daily Knowledge Hub
 
-A single-page web app: live news, a 111-question general-knowledge quiz (plus endless online mode), a vocabulary vault with flashcards, a fact library, on-this-day history, and live markets (gold, silver, BTC, ETH, GBP FX) with a 7-day Bitcoin chart. Day streaks, quiz stats and word mastery are saved in your browser.
+A single-file web app packing a full daily knowledge routine. No build step, no backend, no accounts.
 
-No build step, no backend, no API keys — everything is fetched client-side from public APIs.
+## Features
+
+**Today** — greeting + day streak, live top headlines with one-tap digest, question of the day, weather (any city), word of the day with pronunciation, fun fact, quote of the day, markets at a glance, on-this-day history, latest cs.AI paper from arXiv, trending new GitHub repos, keyword flags, and a GitHub-style activity heatmap.
+
+**News** — BBC, Guardian, Ars Technica, Google News and Hacker News across 9 sections, plus your own custom RSS feeds. Keyword highlighting, NEW badges since your last visit, already-read dimming, save-for-later list, in-app reader view, search, and AI/offline digests.
+
+**Quiz** — 111 built-in questions (plus your own imported packs) across 6 topics with explanations, endless online mode (Open Trivia DB), daily challenge with a shareable score grid, 60-second blitz, sudden death, pass-the-phone two player, spaced-repetition review of your misses, per-category accuracy with Bronze/Silver/Gold badges.
+
+**Words** — 60 CS/academic words with examples, spaced-repetition flashcards (Again/Good/Easy), text-to-speech pronunciation, dictionary lookup for any English word with add-to-vault, reverse quiz (definition → word), and anagram game.
+
+**Facts** — fact of the day, 48-fact library with favourites and share-as-image, fact-or-fiction game, on-this-day events/births/deaths, XKCD of the day, and the daily Lichess chess puzzle.
+
+**Markets** — gold, silver, BTC, ETH (with £ conversions and daily change), FTSE 100, S&P 500, GBP→USD/EUR, switchable charts (BTC 7d / ETH 7d / GBP-USD 30d), a watchlist with live £ valuation and P/L, and price alerts.
+
+**App** — light/dark/auto theme, command palette (Ctrl/Cmd+K), keyboard shortcuts 1–6, settings panel (name, city, card visibility & order), full data export/import, service-worker offline support, installable on your phone.
+
+## Optional AI
+
+Paste an Anthropic API key in **Settings → AI** to enable AI digests. The key is stored only in your browser and calls Anthropic directly. Without a key, Cortex uses a built-in offline digest instead.
 
 ## Deploy on GitHub Pages
 
-1. Create a new **public** repository on GitHub (e.g. `cortex`).
-2. Upload every file in this folder (**Add file → Upload files**), keeping them at the repo root.
-3. Go to **Settings → Pages**, set **Source** to *Deploy from a branch*, choose branch **main** and folder **/ (root)**, then **Save**.
-4. After a minute or two your app is live at `https://<your-username>.github.io/cortex/`.
+1. Create a new **public** repository (e.g. `cortex`).
+2. Upload every file in this folder to the repo root (**Add file → Upload files**).
+3. **Settings → Pages** → Source: *Deploy from a branch* → branch **main**, folder **/ (root)** → Save.
+4. Your app is live at `https://<your-username>.github.io/cortex/` a minute later.
 
-## Use it like an app on your phone
-
-Open the URL on your phone, then **Share → Add to Home Screen** (iPhone) or **⋮ → Add to Home screen** (Android). It launches full-screen with its own icon.
-
-## Run it locally
-
-Just open `index.html` in any browser.
+On your phone: open the URL → **Add to Home Screen** for a full-screen app with its own icon.
 
 ## Files
 
-- `index.html` — the entire app (HTML + CSS + JS in one file)
-- `manifest.json`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` — web-app install metadata
-- `.nojekyll` — tells GitHub Pages to serve files as-is
+`index.html` (the whole app) · `sw.js` (offline cache) · `manifest.json` + icons (install metadata) · `.nojekyll`
 
 ## Data sources
 
-BBC News and Google News RSS (via CORS proxies where needed), Open Trivia DB, Kraken (crypto), gold-api.com (metals), frankfurter.dev (FX), byabbe.se (on this day). Market data is informational only — not financial advice.
+BBC / Guardian / Ars Technica / Google News RSS, Hacker News (Algolia), Open Trivia DB, Kraken, gold-api.com, frankfurter.dev, Stooq, Open-Meteo, dictionaryapi.dev, byabbe.se, arXiv, GitHub, XKCD, Lichess. Market data is informational only — not financial advice.
